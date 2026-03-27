@@ -1,5 +1,6 @@
 import React from 'react';
 import { useGame } from '../context/GameContext';
+import { useLanguage } from '../context/LanguageContext';
 import { Layout } from '../components/Layout';
 import { Beer, Clock, TrendingUp, Zap, AlertTriangle } from 'lucide-react';
 import { CLUBHOUSE_ACTIVITIES } from '../utils/clubhouse';
@@ -10,6 +11,7 @@ const COST_COLOR = { low: 'text-emerald-400', medium: 'text-yellow-400', high: '
 
 export const Clubhouse: React.FC = () => {
     const { save, doClubhouseActivity } = useGame();
+    const { t, sub } = useLanguage();
 
     if (!save) return null;
 
@@ -42,8 +44,8 @@ export const Clubhouse: React.FC = () => {
         <Layout>
             <div className="space-y-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-white">Clubhouse</h1>
-                    <p className="text-slate-400 text-sm">an teach tábhairne · team activities</p>
+                    <h1 className="text-3xl font-bold text-white">{t('An Clubhouse', 'Clubhouse')}</h1>
+                    {sub('team activities') && <p className="text-slate-400 text-sm">an teach tábhairne · {sub('team activities')}</p>}
                 </div>
 
                 {/* Squad overview */}
@@ -161,8 +163,8 @@ export const Clubhouse: React.FC = () => {
                                             </>
                                         ) : (
                                             <>
-                                                <span>Déan é! · Do it!</span>
-                                                <span className="text-xs font-normal opacity-50">+{activity.moraleBoost} morale · {activity.fitnessImpact} fitness</span>
+                                                <span>{t('Déan é!', 'Do it!')}</span>
+                                                {sub('do it') && <span className="text-xs font-normal opacity-50">+{activity.moraleBoost} morale · {activity.fitnessImpact} fitness</span>}
                                             </>
                                         )}
                                     </button>

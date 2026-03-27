@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
+import { useLanguage } from '../context/LanguageContext';
 import { Layout } from '../components/Layout';
 import { Calendar, TrendingUp, Activity, Shield, PlayCircle, RefreshCw, ChevronRight, Trophy, AlertTriangle, X } from 'lucide-react';
 import { formatScore } from '../utils/engine';
@@ -41,6 +42,7 @@ const SEVERITY_STYLE = {
 
 export const Dashboard: React.FC = () => {
     const { save, startNewSeason, advancePhase, dismissScandal } = useGame();
+    const { t, sub } = useLanguage();
     const navigate = useNavigate();
 
     const data = useMemo(() => {
@@ -212,12 +214,12 @@ export const Dashboard: React.FC = () => {
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-bold text-white">{team?.name}</h1>
-                        <p className="text-emerald-500 font-medium">{save.code} • Séasúr {save.season}
-                            <span className="text-slate-500 font-normal"> · season</span>
+                        <p className="text-emerald-500 font-medium">{save.code} • {t('Séasúr', 'Season')} {save.season}
+                            {sub('season') && <span className="text-slate-500 font-normal"> · {sub('season')}</span>}
                         </p>
                     </div>
                     <div className="text-right">
-                        <div className="text-sm text-slate-400">Bainisteoir <span className="text-slate-600 text-xs font-normal">manager</span></div>
+                        <div className="text-sm text-slate-400">{t('Bainisteoir', 'Manager')} {sub('manager') && <span className="text-slate-600 text-xs font-normal">{sub('manager')}</span>}</div>
                         <div className="font-semibold text-white">{save.managerName}</div>
                     </div>
                 </div>
@@ -259,7 +261,8 @@ export const Dashboard: React.FC = () => {
                 {/* ── Path to All Ireland ── */}
                 <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
                     <div className="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-3">
-                        An Bealach go Croke Park <span className="font-normal normal-case text-slate-600">· the road to the All Ireland</span>
+                        {t('An Bealach go Croke Park', 'The Road to the All Ireland')}
+                        {sub('the road to the All Ireland') && <span className="font-normal normal-case text-slate-600"> · {sub('the road to the All Ireland')}</span>}
                     </div>
                     <div className="flex items-center gap-1 overflow-x-auto pb-1">
                         {PHASE_ORDER.map((phase, i) => {
@@ -323,28 +326,27 @@ export const Dashboard: React.FC = () => {
                             <div>
                                 {data.currentPhase === 'all-ireland-final' && data.knockoutWon ? (
                                     <>
-                                        <div className="text-2xl font-black text-white mb-1">🏆 Craobh na hÉireann!</div>
-                                        <div className="text-emerald-400 font-medium">All Ireland Champions!</div>
-                                        <div className="text-slate-500 text-sm mt-1">Séasúr {save.season} críochnaithe — season complete</div>
+                                        <div className="text-2xl font-black text-white mb-1">🏆 {t('Craobh na hÉireann!', 'All Ireland Champions!')}</div>
+                                        <div className="text-emerald-400 font-medium">{t('Seaimpíní na hÉireann!', 'All Ireland Champions!')}</div>
+                                        <div className="text-slate-500 text-sm mt-1">{t(`Séasúr ${save.season} críochnaithe`, `Season ${save.season} complete`)}</div>
                                     </>
                                 ) : data.currentPhase === 'group' ? (
                                     <>
-                                        <div className="text-2xl font-black text-white mb-1">😔 Séasúr Thart</div>
+                                        <div className="text-2xl font-black text-white mb-1">😔 {t('Séasúr Thart', 'Season Over')}</div>
                                         <div className="text-slate-300 font-medium">
-                                            {data.playerPos}ú háit sa ghrúpa — {data.playerPos}{data.playerPos === 1 ? 'st' : data.playerPos === 2 ? 'nd' : data.playerPos === 3 ? 'rd' : 'th'} in the group. Top 2 advance.
+                                            {data.playerPos}{data.playerPos === 1 ? 'st' : data.playerPos === 2 ? 'nd' : data.playerPos === 3 ? 'rd' : 'th'} in the group. Top 2 advance.
                                         </div>
                                         <div className="text-slate-500 text-sm mt-1">
-                                            {data.playerRow ? `${data.playerRow.W}B ${data.playerRow.D}C ${data.playerRow.L}F` : ''}
+                                            {data.playerRow ? `${data.playerRow.W}W ${data.playerRow.D}D ${data.playerRow.L}L` : ''}
                                         </div>
                                     </>
                                 ) : (
                                     <>
-                                        <div className="text-2xl font-black text-white mb-1">😔 Eliminated</div>
+                                        <div className="text-2xl font-black text-white mb-1">😔 {t('Deireadh le Séasúr', 'Eliminated')}</div>
                                         <div className="text-slate-300 font-medium">
-                                            Out in the {PHASE_EN[data.currentPhase]}
-                                            <span className="text-slate-500 text-sm ml-2">({PHASE_LABEL[data.currentPhase]})</span>
+                                            {t(`Amuigh sa ${PHASE_LABEL[data.currentPhase]}`, `Out in the ${PHASE_EN[data.currentPhase]}`)}
                                         </div>
-                                        <div className="text-slate-500 text-sm mt-1">Séasúr {save.season} críochnaithe</div>
+                                        <div className="text-slate-500 text-sm mt-1">{t(`Séasúr ${save.season} críochnaithe`, `Season ${save.season} complete`)}</div>
                                     </>
                                 )}
                             </div>
@@ -354,8 +356,8 @@ export const Dashboard: React.FC = () => {
                             >
                                 <RefreshCw size={18} />
                                 <div className="flex flex-col items-start">
-                                    <span>Séasúr Nua — {save.season + 1}</span>
-                                    <span className="text-emerald-200/50 text-xs font-normal">new season</span>
+                                    <span>{t(`Séasúr Nua — ${save.season + 1}`, `New Season — ${save.season + 1}`)}</span>
+                                    {sub('new season') && <span className="text-emerald-200/50 text-xs font-normal">{sub('new season')}</span>}
                                 </div>
                             </button>
                         </div>
@@ -368,16 +370,16 @@ export const Dashboard: React.FC = () => {
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                             <div>
                                 <div className="text-lg font-black text-emerald-300 mb-1">
-                                    {data.currentPhase === 'group' ? '🎉 Cáilithe!' : '🏅 Ár Aghaidh!'}
+                                    {data.currentPhase === 'group' ? `🎉 ${t('Cáilithe!', 'Qualified!')}` : `🏅 ${t('Ar Aghaidh!', 'Advance!')}`}
                                 </div>
                                 <div className="text-white font-medium">
                                     {data.currentPhase === 'group'
-                                        ? `${data.playerPos}ú háit — you qualified from the group!`
+                                        ? `${data.playerPos}${data.playerPos === 1 ? 'st' : data.playerPos === 2 ? 'nd' : 'th'} — you qualified from the group!`
                                         : `You won the ${PHASE_EN[data.currentPhase]}!`}
                                 </div>
                                 <div className="text-emerald-400/70 text-sm mt-1">
-                                    Next: {PHASE_EN[data.nextPhase]}
-                                    <span className="text-emerald-600 ml-2">· {PHASE_LABEL[data.nextPhase]}</span>
+                                    {t('An chéad chéim eile', 'Next')}: {t(PHASE_LABEL[data.nextPhase], PHASE_EN[data.nextPhase])}
+                                    {sub(PHASE_EN[data.nextPhase]) && <span className="text-emerald-600 ml-2">· {PHASE_EN[data.nextPhase]}</span>}
                                 </div>
                             </div>
                             <button
@@ -386,8 +388,8 @@ export const Dashboard: React.FC = () => {
                             >
                                 <Trophy size={18} />
                                 <div className="flex flex-col items-start">
-                                    <span>Ar Aghaidh!</span>
-                                    <span className="text-emerald-200/50 text-xs font-normal">advance to next round</span>
+                                    <span>{t('Ar Aghaidh!', 'Advance!')}</span>
+                                    {sub('advance to next round') && <span className="text-emerald-200/50 text-xs font-normal">{sub('advance to next round')}</span>}
                                 </div>
                                 <ChevronRight size={18} />
                             </button>
@@ -404,10 +406,10 @@ export const Dashboard: React.FC = () => {
                         <div className="flex items-center space-x-3">
                             <PlayCircle size={22} />
                             <div className="text-left">
-                                <div className="font-bold">Imir an Chéad Cluiche Eile!</div>
-                                <div className="text-emerald-200/40 text-xs font-normal">play next match</div>
+                                <div className="font-bold">{t('Imir an Chéad Cluiche Eile!', 'Play Next Match!')}</div>
+                                {sub('play next match') && <div className="text-emerald-200/40 text-xs font-normal">{sub('play next match')}</div>}
                                 <div className="text-emerald-200/70 text-sm font-normal">
-                                    {data.nextIsHome ? 'Baile' : 'As baile'} vs {data.nextOpponent.name}
+                                    {data.nextIsHome ? t('Baile', 'Home') : t('As baile', 'Away')} vs {data.nextOpponent.name}
                                     {' '}·{' '}{data.nextFixture!.venue}
                                     {' '}·{' '}
                                     {new Date(data.nextFixture!.date).toLocaleDateString('en-IE', { weekday: 'short', day: 'numeric', month: 'short' })}
@@ -423,18 +425,18 @@ export const Dashboard: React.FC = () => {
                     <div className="bg-slate-900 p-4 rounded-xl border border-slate-800">
                         <div className="flex items-center space-x-3 mb-2">
                             <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500"><Calendar size={20} /></div>
-                            <span className="text-slate-400 font-medium">An Chéad Cluiche <span className="text-slate-600 text-xs font-normal">next match</span></span>
+                            <span className="text-slate-400 font-medium">{t('An Chéad Cluiche', 'Next Match')} {sub('next match') && <span className="text-slate-600 text-xs font-normal">{sub('next match')}</span>}</span>
                         </div>
                         {data?.nextOpponent && !data.seasonOver && !data.canAdvance ? (
                             <>
                                 <div className="text-lg font-bold text-white">vs {data.nextOpponent.name}</div>
                                 <div className="text-sm text-slate-500">
-                                    {data.nextIsHome ? 'Baile' : 'As Baile'} · {new Date(data.nextFixture!.date).toLocaleDateString('en-IE', { weekday: 'short', day: 'numeric', month: 'short' })}
+                                    {data.nextIsHome ? t('Baile', 'Home') : t('As Baile', 'Away')} · {new Date(data.nextFixture!.date).toLocaleDateString('en-IE', { weekday: 'short', day: 'numeric', month: 'short' })}
                                 </div>
                             </>
                         ) : (
                             <div className="text-slate-500 text-sm">
-                                {data?.seasonOver ? 'Séasúr críochnaithe · season over' : data?.canAdvance ? 'Advance to next round!' : 'Níl cluichí eile ann'}
+                                {data?.seasonOver ? t('Séasúr críochnaithe', 'Season over') : data?.canAdvance ? t('Ar aghaidh go dtí an chéad bhabhta eile!', 'Advance to next round!') : t('Níl cluichí eile ann', 'No upcoming fixtures')}
                             </div>
                         )}
                     </div>
@@ -442,7 +444,7 @@ export const Dashboard: React.FC = () => {
                     <div className="bg-slate-900 p-4 rounded-xl border border-slate-800">
                         <div className="flex items-center space-x-3 mb-2">
                             <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500"><TrendingUp size={20} /></div>
-                            <span className="text-slate-400 font-medium">Foirm <span className="text-slate-600 text-xs font-normal">form</span></span>
+                            <span className="text-slate-400 font-medium">{t('Foirm', 'Form')} {sub('form') && <span className="text-slate-600 text-xs font-normal">{sub('form')}</span>}</span>
                         </div>
                         <div className="flex space-x-1 mt-1">
                             {(data?.form ?? [null, null, null, null, null]).map((res, i) => (
@@ -460,7 +462,7 @@ export const Dashboard: React.FC = () => {
                     <div className="bg-slate-900 p-4 rounded-xl border border-slate-800">
                         <div className="flex items-center space-x-3 mb-2">
                             <div className="p-2 bg-purple-500/10 rounded-lg text-purple-500"><Activity size={20} /></div>
-                            <span className="text-slate-400 font-medium">Aclaíocht <span className="text-slate-600 text-xs font-normal">fitness</span></span>
+                            <span className="text-slate-400 font-medium">{t('Aclaíocht', 'Fitness')} {sub('fitness') && <span className="text-slate-600 text-xs font-normal">{sub('fitness')}</span>}</span>
                         </div>
                         <div className="text-2xl font-bold text-white">{data?.avgFitness ?? '—'}%</div>
                         <div className="w-full bg-slate-800 h-1.5 rounded-full mt-2">
@@ -471,14 +473,19 @@ export const Dashboard: React.FC = () => {
                     <div className="bg-slate-900 p-4 rounded-xl border border-slate-800">
                         <div className="flex items-center space-x-3 mb-2">
                             <div className="p-2 bg-orange-500/10 rounded-lg text-orange-500"><Shield size={20} /></div>
-                            <span className="text-slate-400 font-medium">Muinín an Choiste <span className="text-slate-600 text-xs font-normal">board confidence</span></span>
+                            <span className="text-slate-400 font-medium">{t('Muinín an Choiste', 'Board Confidence')} {sub('board confidence') && <span className="text-slate-600 text-xs font-normal">{sub('board confidence')}</span>}</span>
                         </div>
                         <div className={clsx(
                             'text-xl font-bold',
                             data?.boardConf === 'An-Sásta!' ? 'text-emerald-400' :
                             data?.boardConf === 'Faoi Bhrú' ? 'text-yellow-400' :
                             data?.boardConf === 'Géarchéim!' ? 'text-red-400' : 'text-white'
-                        )}>{data?.boardConf ?? 'Sábháilte'}</div>
+                        )}>
+                            {data?.boardConf === 'An-Sásta!' ? t('An-Sásta!', 'Very Happy!')
+                            : data?.boardConf === 'Faoi Bhrú' ? t('Faoi Bhrú', 'Under Pressure')
+                            : data?.boardConf === 'Géarchéim!' ? t('Géarchéim!', 'Crisis!')
+                            : t('Sábháilte', 'Safe')}
+                        </div>
                         <div className="text-sm text-slate-500">{data ? PHASE_EN[data.currentPhase] : 'Pre-season'}</div>
                     </div>
                 </div>
@@ -488,7 +495,8 @@ export const Dashboard: React.FC = () => {
                     {/* Group standings */}
                     <div className="lg:col-span-2 bg-slate-900 rounded-xl border border-slate-800 p-6">
                         <h3 className="text-lg font-bold text-white mb-4">
-                            Seasamh sa Ghrúpa <span className="text-slate-500 text-sm font-normal">· group standings</span>
+                            {t('Seasamh sa Ghrúpa', 'Group Standings')}
+                            {sub('group standings') && <span className="text-slate-500 text-sm font-normal"> · {sub('group standings')}</span>}
                         </h3>
                         {data && data.standings.length > 0 ? (
                             <div className="space-y-1">
@@ -528,21 +536,22 @@ export const Dashboard: React.FC = () => {
                                 <div className="text-xs text-emerald-600/60 px-3 pt-1">Top 2 advance to Provincial Championship</div>
                             </div>
                         ) : (
-                            <p className="text-slate-500 text-sm">Níl aon chluiche imeartha fós. Téigh go dtí Cláracha le d'imirt!</p>
+                            <p className="text-slate-500 text-sm">{t('Níl aon chluiche imeartha fós. Téigh go dtí Cláracha le d\'imirt!', 'No matches played yet. Head to Fixtures to play!')}</p>
                         )}
                     </div>
 
                     {/* Recent results */}
                     <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
                         <h3 className="text-lg font-bold text-white mb-4">
-                            Torthaí le Déanaí <span className="text-slate-500 text-sm font-normal">· recent results</span>
+                            {t('Torthaí le Déanaí', 'Recent Results')}
+                            {sub('recent results') && <span className="text-slate-500 text-sm font-normal"> · {sub('recent results')}</span>}
                         </h3>
                         {data && data.recentResults.length > 0 ? (
                             <div className="space-y-3">
                                 {data.recentResults.map(({ f, isHome, opp, myScore, oppScore, outcome }) => (
                                     <div key={f.id} className="p-3 bg-slate-950/50 rounded-lg">
                                         <div className="flex items-center justify-between mb-1">
-                                            <span className="text-xs text-slate-500">{isHome ? 'H' : 'A'} vs {opp?.name}</span>
+                                            <span className="text-xs text-slate-500">{isHome ? t('B', 'H') : t('AB', 'A')} vs {opp?.name}</span>
                                             <span className={clsx(
                                                 'text-xs font-bold px-1.5 py-0.5 rounded',
                                                 outcome === 'W' ? 'bg-emerald-500/20 text-emerald-400' :

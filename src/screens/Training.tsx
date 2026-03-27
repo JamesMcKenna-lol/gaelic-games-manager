@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useGame } from '../context/GameContext';
+import { useLanguage } from '../context/LanguageContext';
 import { Layout } from '../components/Layout';
 import { Dumbbell, TrendingUp, AlertTriangle, CheckCircle, Zap } from 'lucide-react';
 import type { TrainingFocus, TrainingIntensity, TrainingSchedule } from '../types';
@@ -20,6 +21,7 @@ const FOCUS_ICON: Record<TrainingFocus, string> = {
 
 export const Training: React.FC = () => {
     const { save, setTraining, applyTrainingWeek } = useGame();
+    const { t, sub } = useLanguage();
 
     const [focus, setFocus] = useState<TrainingFocus>(save?.training?.focus ?? 'fitness');
     const [intensity, setIntensity] = useState<TrainingIntensity>(save?.training?.intensity ?? 'medium');
@@ -58,8 +60,8 @@ export const Training: React.FC = () => {
         <Layout>
             <div className="space-y-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-white">Traenáil</h1>
-                    <p className="text-slate-400 text-sm">training schedule</p>
+                    <h1 className="text-3xl font-bold text-white">{t('Traenáil', 'Training')}</h1>
+                    {sub('training schedule') && <p className="text-slate-400 text-sm">{sub('training schedule')}</p>}
                 </div>
 
                 {/* Current squad stats */}
@@ -109,7 +111,8 @@ export const Training: React.FC = () => {
                 {/* Focus selection */}
                 <div>
                     <div className="text-sm font-semibold text-slate-300 mb-3">
-                        Training Focus <span className="text-slate-600 font-normal">· fócas traenála</span>
+                        {t('Fócas Traenála', 'Training Focus')}
+                        {sub('fócas traenála') && <span className="text-slate-600 font-normal"> · {sub('fócas traenála')}</span>}
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                         {FOCUSES.map(f => {
@@ -265,8 +268,8 @@ export const Training: React.FC = () => {
                         onClick={handleSave}
                         className="flex-1 py-3 px-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-medium transition-colors flex flex-col items-center"
                     >
-                        <span>Sábháil Sceideal</span>
-                        <span className="text-xs font-normal opacity-50">save schedule</span>
+                        <span>{t('Sábháil Sceideal', 'Save Schedule')}</span>
+                        {sub('save schedule') && <span className="text-xs font-normal opacity-50">{sub('save schedule')}</span>}
                     </button>
                     <button
                         onClick={handleApplyWeek}
@@ -279,13 +282,13 @@ export const Training: React.FC = () => {
                     >
                         {applied ? (
                             <>
-                                <span className="flex items-center space-x-1"><CheckCircle size={16} /><span>Applied!</span></span>
-                                <span className="text-xs font-normal opacity-50">traenáil curtha i bhfeidhm</span>
+                                <span className="flex items-center space-x-1"><CheckCircle size={16} /><span>{t('Curtha i bhfeidhm!', 'Applied!')}</span></span>
+                                {sub('training applied') && <span className="text-xs font-normal opacity-50">{sub('training applied')}</span>}
                             </>
                         ) : (
                             <>
-                                <span className="flex items-center space-x-1"><Zap size={16} /><span>Apply Training Week</span></span>
-                                <span className="text-xs font-normal opacity-50">cuir seachtain traenála i bhfeidhm</span>
+                                <span className="flex items-center space-x-1"><Zap size={16} /><span>{t('Cuir Seachtain i bhfeidhm', 'Apply Training Week')}</span></span>
+                                {sub('apply training week') && <span className="text-xs font-normal opacity-50">{sub('apply training week')}</span>}
                             </>
                         )}
                     </button>
