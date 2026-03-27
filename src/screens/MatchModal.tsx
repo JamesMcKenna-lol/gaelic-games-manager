@@ -3,8 +3,11 @@ import type { Match, Team, Player } from '../types';
 import { simulateMatch, formatScore } from '../utils/engine';
 import { playGoalSound, playPointSound, playWhistleSound, playWinSound, playLossSound, resumeAudio } from '../utils/sounds';
 import { CulOverlay } from '../components/CulOverlay';
+import { GaaPitch } from '../components/GaaPitch';
 import clsx from 'clsx';
-import { X, MapPin } from 'lucide-react';
+import { X, MapPin, AlignLeft, Tv2 } from 'lucide-react';
+
+type MatchView = 'pitch' | 'commentary';
 
 interface MatchModalProps {
     match: Match;
@@ -39,6 +42,9 @@ export const MatchModal: React.FC<MatchModalProps> = ({
     const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
     const feedRef = useRef<HTMLDivElement>(null);
     const prevLengthRef = useRef(0);
+
+    // View toggle
+    const [matchView, setMatchView] = useState<MatchView>('pitch');
 
     // CÚL overlay state
     const [culKey, setCulKey] = useState(0);
@@ -169,6 +175,9 @@ export const MatchModal: React.FC<MatchModalProps> = ({
     const homeScoreStr = `${liveScore.hG}-${String(liveScore.hP).padStart(2, '0')} (${liveScore.hG * 3 + liveScore.hP})`;
     const awayScoreStr = `${liveScore.aG}-${String(liveScore.aP).padStart(2, '0')} (${liveScore.aG * 3 + liveScore.aP})`;
 
+    // Last event for pitch view
+    const lastEvent = visibleEvents[visibleEvents.length - 1] ?? null;
+
     // Resolve team colors for the goal that just scored
     const culTeam = culTeamId === match.homeTeamId ? homeTeam : awayTeam;
 
@@ -183,166 +192,178 @@ export const MatchModal: React.FC<MatchModalProps> = ({
                 onDone={() => setShowCul(false)}
             />
 
-            {/* Match Header */}
-            <div className="bg-slate-900 border-b border-slate-800 p-4 flex-shrink-0">
-                <div className="max-w-2xl mx-auto">
-                    <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs text-slate-500 uppercase tracking-wide font-medium">Craobh</span>
-                        <div className="flex items-center space-x-3">
-                            <span className={clsx(
-                                'text-sm font-mono font-bold px-2 py-0.5 rounded',
-                                isDone ? 'bg-slate-700 text-slate-300' : 'bg-emerald-900/50 text-emerald-400'
-                            )}>
-                                {isDone ? 'Críoch' : `${currentMinute}'`}
-                            </span>
-                            <button onClick={onClose} className="p-1 text-slate-500 hover:text-white transition-colors">
-                                <X size={20} />
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="text-center text-xs text-slate-500 mt-2 mb-3 flex items-center justify-center space-x-1">
-                        <MapPin size={12} />
-                        <span>{match.venue}</span>
+            {/* ── MATCH HEADER ── */}
+            <div className="bg-slate-900 border-b border-slate-800 px-4 pt-3 pb-2 flex-shrink-0">
+                <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center space-x-1.5 text-xs text-slate-500">
+                        <MapPin size={11} />
+                        <span className="truncate max-w-[160px]">{match.venue}</span>
                         <span>·</span>
-                        <span>{match.venueCapacity.toLocaleString()} cap.</span>
+                        <span>{match.venueCapacity.toLocaleString()}</span>
                     </div>
+                    <div className="flex items-center space-x-2">
+                        <span className={clsx(
+                            'text-sm font-mono font-bold px-2 py-0.5 rounded',
+                            isDone ? 'bg-slate-700 text-slate-300' : 'bg-emerald-900/50 text-emerald-400'
+                        )}>
+                            {isDone ? 'Críoch' : `${currentMinute}'`}
+                        </span>
+                        <button onClick={onClose} className="p-1 text-slate-500 hover:text-white transition-colors">
+                            <X size={20} />
+                        </button>
+                    </div>
+                </div>
 
-                    <div className="flex items-center">
-                        {/* Home team */}
-                        <div className="flex-1 text-center">
-                            <div className="flex items-center justify-center space-x-2 mb-1">
-                                <div
-                                    className="w-5 h-5 rounded-full border border-white/20 flex-shrink-0"
-                                    style={{ background: `linear-gradient(135deg, ${homeTeam.colors[0]} 50%, ${homeTeam.colors[1]} 50%)` }}
-                                />
-                                <span className="font-bold text-white text-sm md:text-base">{homeTeam.name}</span>
-                            </div>
-                            {isPlayerHome && <div className="text-xs text-emerald-500 font-medium mb-1">TÚ FÉIN</div>}
-                            <div
-                                key={homeBumpKey}
-                                className={clsx(
-                                    'text-2xl md:text-3xl font-mono font-bold text-white',
-                                    homeBumpKey > 0 && 'animate-score-bump'
-                                )}
-                            >
-                                {homeScoreStr}
-                            </div>
+                {/* Scoreboard */}
+                <div className="flex items-center">
+                    <div className="flex-1 text-center">
+                        <div className="flex items-center justify-center space-x-2 mb-0.5">
+                            <div className="w-4 h-4 rounded-full border border-white/20 flex-shrink-0"
+                                style={{ background: `linear-gradient(135deg, ${homeTeam.colors[0]} 50%, ${homeTeam.colors[1]} 50%)` }} />
+                            <span className="font-bold text-white text-sm">{homeTeam.name}</span>
                         </div>
-
-                        <div className="text-slate-600 font-bold text-xl mx-3">—</div>
-
-                        {/* Away team */}
-                        <div className="flex-1 text-center">
-                            <div className="flex items-center justify-center space-x-2 mb-1">
-                                <div
-                                    className="w-5 h-5 rounded-full border border-white/20 flex-shrink-0"
-                                    style={{ background: `linear-gradient(135deg, ${awayTeam.colors[0]} 50%, ${awayTeam.colors[1]} 50%)` }}
-                                />
-                                <span className="font-bold text-white text-sm md:text-base">{awayTeam.name}</span>
-                            </div>
-                            {!isPlayerHome && <div className="text-xs text-emerald-500 font-medium mb-1">TÚ FÉIN</div>}
-                            <div
-                                key={awayBumpKey}
-                                className={clsx(
-                                    'text-2xl md:text-3xl font-mono font-bold text-white',
-                                    awayBumpKey > 0 && 'animate-score-bump'
-                                )}
-                            >
-                                {awayScoreStr}
-                            </div>
+                        {isPlayerHome && <div className="text-xs text-emerald-500 font-medium">TÚ FÉIN</div>}
+                        <div key={homeBumpKey} className={clsx('text-2xl font-mono font-bold text-white', homeBumpKey > 0 && 'animate-score-bump')}>
+                            {homeScoreStr}
+                        </div>
+                    </div>
+                    <div className="text-slate-600 font-bold text-lg mx-2">—</div>
+                    <div className="flex-1 text-center">
+                        <div className="flex items-center justify-center space-x-2 mb-0.5">
+                            <div className="w-4 h-4 rounded-full border border-white/20 flex-shrink-0"
+                                style={{ background: `linear-gradient(135deg, ${awayTeam.colors[0]} 50%, ${awayTeam.colors[1]} 50%)` }} />
+                            <span className="font-bold text-white text-sm">{awayTeam.name}</span>
+                        </div>
+                        {!isPlayerHome && <div className="text-xs text-emerald-500 font-medium">TÚ FÉIN</div>}
+                        <div key={awayBumpKey} className={clsx('text-2xl font-mono font-bold text-white', awayBumpKey > 0 && 'animate-score-bump')}>
+                            {awayScoreStr}
                         </div>
                     </div>
                 </div>
+
+                {/* View tab toggle — visible on all sizes */}
+                <div className="flex mt-2 rounded-lg overflow-hidden border border-slate-700">
+                    <button
+                        onClick={() => setMatchView('pitch')}
+                        className={clsx(
+                            'flex-1 flex items-center justify-center space-x-1.5 py-1.5 text-xs font-semibold transition-colors',
+                            matchView === 'pitch' ? 'bg-slate-700 text-white' : 'text-slate-500 hover:text-slate-300'
+                        )}
+                    >
+                        <Tv2 size={13} />
+                        <span>An Páirc</span>
+                    </button>
+                    <button
+                        onClick={() => setMatchView('commentary')}
+                        className={clsx(
+                            'flex-1 flex items-center justify-center space-x-1.5 py-1.5 text-xs font-semibold transition-colors',
+                            matchView === 'commentary' ? 'bg-slate-700 text-white' : 'text-slate-500 hover:text-slate-300'
+                        )}
+                    >
+                        <AlignLeft size={13} />
+                        <span>Tuairisceoir</span>
+                    </button>
+                </div>
             </div>
 
-            {/* Commentary Feed */}
-            <div ref={feedRef} className="flex-1 overflow-y-auto p-4">
-                <div className="max-w-2xl mx-auto space-y-2 pb-4">
-                    {visibleEvents.map((event, i) => (
-                        <div
-                            key={i}
-                            className={clsx(
-                                'flex items-start space-x-3 p-3 rounded-lg animate-fade-in-up',
-                                event.type === 'goal'
-                                    ? 'bg-emerald-900/40 border border-emerald-700/60'
-                                    : event.type === 'whistle'
-                                    ? 'bg-amber-900/20 border border-amber-800/40'
-                                    : event.type === 'wide'
-                                    ? 'bg-slate-900/30'
-                                    : 'bg-slate-900/50'
-                            )}
-                        >
-                            <span className="text-xs font-mono text-slate-500 w-8 flex-shrink-0 pt-0.5">
-                                {event.minute}'
-                            </span>
-                            <span className={clsx(
-                                'text-sm leading-relaxed',
-                                event.type === 'goal' ? 'text-emerald-300 font-bold' :
-                                event.type === 'point' ? 'text-white' :
-                                event.type === 'whistle' ? 'text-amber-300 font-semibold' :
-                                'text-slate-400'
-                            )}>
-                                {event.type === 'goal' && <span className="mr-1">⚽</span>}
-                                {event.type === 'point' && <span className="mr-1">🏳️</span>}
-                                {event.type === 'whistle' && <span className="mr-1">📢</span>}
-                                {event.text}
-                            </span>
-                        </div>
-                    ))}
+            {/* ── CONTENT AREA ── */}
+            <div className="flex-1 flex overflow-hidden">
 
-                    {!isDone && visibleEvents.length < simulatedMatch.events.length && (
-                        <div className="flex justify-center py-4">
-                            <div className="flex space-x-1.5">
-                                {[0, 1, 2].map(i => (
-                                    <div
-                                        key={i}
-                                        className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce"
-                                        style={{ animationDelay: `${i * 180}ms` }}
-                                    />
+                {/* PITCH VIEW */}
+                <div className={clsx(
+                    'flex flex-col',
+                    // Mobile: full width when pitch tab active
+                    matchView === 'pitch' ? 'flex w-full' : 'hidden',
+                    // On lg+ always show alongside commentary
+                    'lg:flex lg:w-[52%] lg:border-r lg:border-slate-800'
+                )}>
+                    <GaaPitch
+                        homeTeam={homeTeam}
+                        awayTeam={awayTeam}
+                        homePlayers={homePlayers}
+                        awayPlayers={awayPlayers}
+                        lastEvent={lastEvent}
+                        currentMinute={currentMinute}
+                        isDone={isDone}
+                        playerTeamId={playerTeamId}
+                    />
+                </div>
+
+                {/* COMMENTARY FEED */}
+                <div
+                    ref={feedRef}
+                    className={clsx(
+                        'overflow-y-auto p-3',
+                        matchView === 'commentary' ? 'flex-1' : 'hidden',
+                        'lg:flex lg:flex-col lg:flex-1'
+                    )}
+                >
+                    <div className="space-y-1.5 pb-4">
+                        {visibleEvents.map((event, i) => (
+                            <div
+                                key={i}
+                                className={clsx(
+                                    'flex items-start space-x-2 p-2.5 rounded-lg animate-fade-in-up text-xs',
+                                    event.type === 'goal'   ? 'bg-emerald-900/40 border border-emerald-700/60' :
+                                    event.type === 'whistle'? 'bg-amber-900/20 border border-amber-800/40' :
+                                    event.type === 'wide'   ? 'bg-slate-900/20' :
+                                    'bg-slate-900/40'
+                                )}
+                            >
+                                <span className="font-mono text-slate-500 w-6 flex-shrink-0 pt-0.5">{event.minute}'</span>
+                                <span className={clsx(
+                                    'leading-relaxed',
+                                    event.type === 'goal'    ? 'text-emerald-300 font-bold' :
+                                    event.type === 'point'   ? 'text-white' :
+                                    event.type === 'whistle' ? 'text-amber-300 font-semibold' :
+                                    'text-slate-400'
+                                )}>
+                                    {event.type === 'goal'    && '⚽ '}
+                                    {event.type === 'point'   && '🏳️ '}
+                                    {event.type === 'whistle' && '📢 '}
+                                    {event.text}
+                                </span>
+                            </div>
+                        ))}
+                        {!isDone && visibleEvents.length < simulatedMatch.events.length && (
+                            <div className="flex justify-center py-3 space-x-1.5">
+                                {[0,1,2].map(i => (
+                                    <div key={i} className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce"
+                                        style={{ animationDelay: `${i * 180}ms` }} />
                                 ))}
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             </div>
 
-            {/* Footer */}
-            <div className="bg-slate-900 border-t border-slate-800 p-4 flex-shrink-0">
-                <div className="max-w-2xl mx-auto space-y-3">
+            {/* ── FOOTER ── */}
+            <div className="bg-slate-900 border-t border-slate-800 p-3 flex-shrink-0">
+                <div className="space-y-2">
                     {isDone && outcome && (
                         <div className={clsx(
-                            'p-3 rounded-lg text-center font-bold text-lg animate-fade-in-up',
-                            outcome === 'win' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-700' :
+                            'p-2.5 rounded-lg text-center font-bold animate-fade-in-up',
+                            outcome === 'win'  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-700' :
                             outcome === 'draw' ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-700' :
                             'bg-red-500/20 text-red-300 border border-red-800'
                         )}>
-                            {outcome === 'win' && '🏆 Bua! Go hiontach, a bhainisteoir!'}
+                            {outcome === 'win'  && '🏆 Bua! Go hiontach, a bhainisteoir!'}
                             {outcome === 'draw' && '🤝 Cluiche cothrom! Comhbhuaigh!'}
                             {outcome === 'loss' && '😔 Cailleadh an cluiche. Ar ais go dtí an traenáil!'}
                         </div>
                     )}
-
                     {isDone && simulatedMatch.result && (
-                        <div className="text-center text-sm text-slate-400 font-mono">
+                        <div className="text-center text-xs text-slate-500 font-mono">
                             {homeTeam.name} {formatScore(simulatedMatch.result.homeScore)} — {awayTeam.name} {formatScore(simulatedMatch.result.awayScore)}
-                            {'  '}•{'  '}
-                            Seilbh: {simulatedMatch.result.possession.home}%–{simulatedMatch.result.possession.away}%
+                            {' · '}Seilbh: {simulatedMatch.result.possession.home}%–{simulatedMatch.result.possession.away}%
                         </div>
                     )}
-
                     {!isDone ? (
-                        <button
-                            onClick={revealAll}
-                            className="w-full py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-medium transition-colors"
-                        >
+                        <button onClick={revealAll} className="w-full py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-medium transition-colors text-sm">
                             Scip go dtí an Críoch
                         </button>
                     ) : (
-                        <button
-                            onClick={onClose}
-                            className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold transition-colors"
-                        >
+                        <button onClick={onClose} className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold transition-colors">
                             Lean ar Aghaidh →
                         </button>
                     )}
