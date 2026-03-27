@@ -1,6 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { SaveGame, Code, Tactics, Match, CompetitionPhase, SeasonRecord } from '../types';
+import type { SaveGame, Code, Tactics, Match, CompetitionPhase, SeasonRecord, TrainingSchedule, ScandalEvent, ActiveClubhouseEffect } from '../types';
 import { generateTeams, generatePlayers, generateCompetition, generateNextKnockout } from '../utils/data';
+import { SCANDAL_TEMPLATES } from '../utils/scandals';
+import { applyWeeklyTraining } from '../utils/training';
+import { CLUBHOUSE_ACTIVITIES } from '../utils/clubhouse';
 import { v4 as uuidv4 } from 'uuid';
 
 interface GameContextType {
@@ -15,6 +18,10 @@ interface GameContextType {
     saveTactics: (tactics: Tactics) => void;
     updateManagerName: (name: string) => void;
     resetCareer: () => void;
+    setTraining: (schedule: TrainingSchedule) => void;
+    applyTrainingWeek: () => void;
+    doClubhouseActivity: (activityId: string) => void;
+    dismissScandal: (scandalId: string) => void;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -64,10 +71,8 @@ const buildSeasonRecord = (save: SaveGame): SeasonRecord => {
         : false;
     const qualified = groupPos > 0 && groupPos <= 2 && groupDone;
 
-    // Determine furthest phase reached
     let furthestPhase: SeasonRecord['furthestPhase'] = 'eliminated';
     if (save.competitions.length > 1 || (lastPhase === 'group' && qualified)) {
-        // Check if they won each knockout they entered
         for (const comp of save.competitions) {
             if ((comp.phase ?? 'group') === 'group') continue;
             const playerFixture = comp.fixtures.find(
@@ -84,7 +89,7 @@ const buildSeasonRecord = (save: SaveGame): SeasonRecord => {
                 if (myT > oppT) {
                     furthestPhase = comp.phase;
                 } else {
-                    furthestPhase = comp.phase; // lost here, this is the furthest they got
+                    furthestPhase = comp.phase;
                     break;
                 }
             }
@@ -130,6 +135,58 @@ const buildSeasonRecord = (save: SaveGame): SeasonRecord => {
     };
 };
 
+// Pick a scandal and apply it to players/team
+const triggerScandal = (save: SaveGame, matchId: string): SaveGame => {
+    const roll = Math.random();
+    if (roll > 0.01) return save; // 1% chance
+
+    const template = SCANDAL_TEMPLATES[Math.floor(Math.random() * SCANDAL_TEMPLATES.length)];
+    const teamPlayers = save.players.filter(p => p.teamId === save.teamId);
+
+    let affectedPlayerIds: string[] | undefined;
+    let updatedPlayers = save.players;
+
+    if (template.target === 'player' && teamPlayers.length > 0) {
+        const count = Math.min(template.affectedCount ?? 1, teamPlayers.length);
+        const shuffled = [...teamPlayers].sort(() => Math.random() - 0.5);
+        affectedPlayerIds = shuffled.slice(0, count).map(p => p.id);
+
+        // Apply morale impact to affected players (non-uniform: each gets 50-100% of the impact)
+        updatedPlayers = save.players.map(p => {
+            if (!affectedPlayerIds!.includes(p.id)) return p;
+            const individualImpact = template.moraleImpact * (0.5 + Math.random() * 0.5);
+            return { ...p, morale: Math.max(0, Math.min(100, p.morale + individualImpact)) };
+        });
+    } else if (template.target === 'team') {
+        // Affect the whole squad — each player gets 60-100% of morale impact
+        updatedPlayers = save.players.map(p => {
+            if (p.teamId !== save.teamId) return p;
+            const individualImpact = template.moraleImpact * (0.6 + Math.random() * 0.4);
+            return { ...p, morale: Math.max(0, Math.min(100, p.morale + individualImpact)) };
+        });
+    }
+    // manager target: morale impact visible in board confidence — no direct player change
+
+    const scandal: ScandalEvent = {
+        id: uuidv4(),
+        title: template.title,
+        description: template.description,
+        severity: template.severity,
+        moraleImpact: template.moraleImpact,
+        target: template.target,
+        affectedPlayerIds,
+        triggeredAfterMatchId: matchId,
+        season: save.season,
+        dismissed: false,
+    };
+
+    return {
+        ...save,
+        players: updatedPlayers,
+        scandals: [...(save.scandals ?? []), scandal],
+    };
+};
+
 export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [save, setSave] = useState<SaveGame | null>(null);
     const [hasSave, setHasSave] = useState(false);
@@ -160,6 +217,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             teams,
             players,
             careerHistory: [],
+            scandals: [],
+            activeClubhouseEffects: [],
         };
         setSave(newSave);
         setHasSave(true);
@@ -169,8 +228,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const stored = localStorage.getItem('ggm_save');
         if (stored) {
             const parsed = JSON.parse(stored) as SaveGame;
-            // Migrate old saves: ensure required fields exist
+            // Migrate old saves
             if (!parsed.careerHistory) parsed.careerHistory = [];
+            if (!parsed.scandals) parsed.scandals = [];
+            if (!parsed.activeClubhouseEffects) parsed.activeClubhouseEffects = [];
             parsed.competitions = parsed.competitions.map(c => ({
                 ...c,
                 phase: c.phase ?? 'group',
@@ -186,7 +247,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const updateMatch = (updatedMatch: Match) => {
         setSave(prev => {
             if (!prev) return prev;
-            return {
+            let next: SaveGame = {
                 ...prev,
                 competitions: prev.competitions.map(comp => ({
                     ...comp,
@@ -195,6 +256,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     ),
                 })),
             };
+            // Scandal check — only on completed matches
+            if (updatedMatch.played) {
+                next = triggerScandal(next, updatedMatch.id);
+            }
+            return next;
         });
     };
 
@@ -221,6 +287,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 season: prev.season + 1,
                 competitions: [newCompetition],
                 careerHistory: [...(prev.careerHistory ?? []), record],
+                scandals: [],
+                activeClubhouseEffects: [],
             };
         });
     };
@@ -239,8 +307,89 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setHasSave(false);
     };
 
+    const setTraining = (schedule: TrainingSchedule) => {
+        setSave(prev => prev ? { ...prev, training: schedule } : prev);
+    };
+
+    const applyTrainingWeek = () => {
+        setSave(prev => {
+            if (!prev || !prev.training) return prev;
+            const now = new Date();
+            const clubhouseActive = prev.activeClubhouseEffects.some(e => {
+                const expiry = new Date(e.appliedDate);
+                expiry.setDate(expiry.getDate() + e.trainingEffectDays);
+                return expiry > now;
+            });
+            const updatedPlayers = prev.players.map(p =>
+                p.teamId === prev.teamId
+                    ? applyWeeklyTraining(p, prev.training!, clubhouseActive)
+                    : p
+            );
+            // Clean up expired clubhouse effects
+            const activeClubhouseEffects = prev.activeClubhouseEffects.filter(e =>
+                new Date(e.cooldownUntil) > now
+            );
+            return { ...prev, players: updatedPlayers, activeClubhouseEffects };
+        });
+    };
+
+    const doClubhouseActivity = (activityId: string) => {
+        setSave(prev => {
+            if (!prev) return prev;
+            const activity = CLUBHOUSE_ACTIVITIES.find(a => a.id === activityId);
+            if (!activity) return prev;
+
+            const now = new Date();
+            const cooldownUntil = new Date(now);
+            cooldownUntil.setDate(cooldownUntil.getDate() + activity.cooldownDays);
+
+            const effect: ActiveClubhouseEffect = {
+                activityId,
+                appliedDate: now.toISOString(),
+                trainingEffectDays: activity.trainingEffectDays,
+                cooldownUntil: cooldownUntil.toISOString(),
+            };
+
+            // Apply morale boost and fitness drain to all squad players
+            const updatedPlayers = prev.players.map(p => {
+                if (p.teamId !== prev.teamId) return p;
+                // Non-uniform effect: each player gets 70-100% of the morale boost
+                const moraleGain = activity.moraleBoost * (0.7 + Math.random() * 0.3);
+                const fitnessDrain = activity.fitnessImpact * (0.7 + Math.random() * 0.3);
+                return {
+                    ...p,
+                    morale: Math.max(0, Math.min(100, p.morale + moraleGain)),
+                    fitness: Math.max(0, Math.min(100, p.fitness + fitnessDrain)),
+                };
+            });
+
+            return {
+                ...prev,
+                players: updatedPlayers,
+                activeClubhouseEffects: [...prev.activeClubhouseEffects, effect],
+                lastClubhouseActivity: activityId,
+            };
+        });
+    };
+
+    const dismissScandal = (scandalId: string) => {
+        setSave(prev => {
+            if (!prev) return prev;
+            return {
+                ...prev,
+                scandals: prev.scandals.map(s =>
+                    s.id === scandalId ? { ...s, dismissed: true } : s
+                ),
+            };
+        });
+    };
+
     return (
-        <GameContext.Provider value={{ save, startNewCareer, startNewSeason, advancePhase, loadGame, saveGame, hasSave, updateMatch, saveTactics, updateManagerName, resetCareer }}>
+        <GameContext.Provider value={{
+            save, startNewCareer, startNewSeason, advancePhase, loadGame, saveGame,
+            hasSave, updateMatch, saveTactics, updateManagerName, resetCareer,
+            setTraining, applyTrainingWeek, doClubhouseActivity, dismissScandal,
+        }}>
             {children}
         </GameContext.Provider>
     );

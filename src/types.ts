@@ -102,6 +102,50 @@ export interface SeasonRecord {
     provincialWinner: boolean;
 }
 
+export type TrainingFocus = 'fitness' | 'skills' | 'tactical' | 'strength' | 'speed' | 'rest';
+export type TrainingIntensity = 'light' | 'medium' | 'hard';
+
+export interface TrainingSchedule {
+    focus: TrainingFocus;
+    intensity: TrainingIntensity;
+    sessionsPerWeek: number; // 1-5
+}
+
+export type ScandalSeverity = 'minor' | 'moderate' | 'major' | 'catastrophic';
+export type ScandalTarget = 'team' | 'player' | 'manager';
+
+export interface ScandalEvent {
+    id: string;
+    title: string;
+    description: string;
+    severity: ScandalSeverity;
+    moraleImpact: number; // negative number
+    target: ScandalTarget;
+    affectedPlayerIds?: string[]; // if target === 'player', which players
+    triggeredAfterMatchId: string;
+    season: number;
+    dismissed: boolean;
+}
+
+export interface ClubhouseActivity {
+    id: string;
+    name: string;
+    irishName: string;
+    description: string;
+    moraleBoost: number;       // positive
+    fitnessImpact: number;     // negative (drain)
+    trainingEffectDays: number; // days of reduced training effectiveness
+    cooldownDays: number;
+    cost: 'low' | 'medium' | 'high';
+}
+
+export interface ActiveClubhouseEffect {
+    activityId: string;
+    appliedDate: string; // ISO date
+    trainingEffectDays: number;
+    cooldownUntil: string; // ISO date
+}
+
 export interface SaveGame {
     id: string;
     managerName: string;
@@ -114,4 +158,8 @@ export interface SaveGame {
     players: Player[];
     tactics?: Tactics;
     careerHistory: SeasonRecord[];
+    training?: TrainingSchedule;
+    scandals: ScandalEvent[];
+    activeClubhouseEffects: ActiveClubhouseEffect[];
+    lastClubhouseActivity?: string; // activityId
 }
