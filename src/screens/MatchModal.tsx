@@ -251,7 +251,7 @@ export const MatchModal: React.FC<MatchModalProps> = ({
                         )}
                     >
                         <Tv2 size={13} />
-                        <span>An Páirc</span>
+                        <span>An Páirc <span className="font-normal opacity-50">· the pitch</span></span>
                     </button>
                     <button
                         onClick={() => setMatchView('commentary')}
@@ -261,7 +261,7 @@ export const MatchModal: React.FC<MatchModalProps> = ({
                         )}
                     >
                         <AlignLeft size={13} />
-                        <span>Tuairisceoir</span>
+                        <span>Tuairisceoir <span className="font-normal opacity-50">· commentary</span></span>
                     </button>
                 </div>
             </div>
@@ -359,12 +359,14 @@ export const MatchModal: React.FC<MatchModalProps> = ({
                         </div>
                     )}
                     {!isDone ? (
-                        <button onClick={revealAll} className="w-full py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-medium transition-colors text-sm">
-                            Scip go dtí an Críoch
+                        <button onClick={revealAll} className="w-full py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-medium transition-colors text-sm flex flex-col items-center">
+                            <span>Scip go dtí an Críoch</span>
+                            <span className="text-xs font-normal opacity-50">skip to end</span>
                         </button>
                     ) : (
-                        <button onClick={onClose} className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold transition-colors">
-                            Lean ar Aghaidh →
+                        <button onClick={onClose} className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold transition-colors flex flex-col items-center">
+                            <span>Lean ar Aghaidh →</span>
+                            <span className="text-emerald-200/50 text-xs font-normal">continue</span>
                         </button>
                     )}
                 </div>

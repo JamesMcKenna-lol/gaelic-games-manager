@@ -162,10 +162,13 @@ export const NewCareer: React.FC = () => {
                         <button
                             onClick={handleStartGame}
                             disabled={!managerName.trim()}
-                            className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-bold text-lg transition-all hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(16,185,129,0.35)] flex items-center justify-center space-x-2"
+                            className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-bold text-lg transition-all hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(16,185,129,0.35)] flex flex-col items-center justify-center"
                         >
-                            <span>🏆 Tosaigh an Ghairm!</span>
-                            <ChevronRight size={20} />
+                            <div className="flex items-center space-x-2">
+                                <span>🏆 Tosaigh an Ghairm!</span>
+                                <ChevronRight size={20} />
+                            </div>
+                            <span className="text-emerald-200/50 text-xs font-normal">start the career</span>
                         </button>
                         {!managerName.trim() && (
                             <p className="text-center text-xs text-slate-600">Scríobh d'ainm ar dtús… (Enter your name first)</p>

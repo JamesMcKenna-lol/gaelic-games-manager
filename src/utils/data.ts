@@ -1,5 +1,24 @@
 import { v4 as uuidv4 } from 'uuid';
-import type { Team, Player, PlayerAttributes, Code, Competition, Match } from '../types';
+import type { Team, Player, PlayerAttributes, Code, Competition, CompetitionPhase, Match } from '../types';
+
+export const PROVINCE_MAP: Record<string, string> = {
+    'Antrim': 'Ulster', 'Armagh': 'Ulster', 'Cavan': 'Ulster', 'Derry': 'Ulster',
+    'Donegal': 'Ulster', 'Down': 'Ulster', 'Fermanagh': 'Ulster', 'Monaghan': 'Ulster', 'Tyrone': 'Ulster',
+    'Carlow': 'Leinster', 'Dublin': 'Leinster', 'Kildare': 'Leinster', 'Kilkenny': 'Leinster',
+    'Laois': 'Leinster', 'Longford': 'Leinster', 'Louth': 'Leinster', 'Meath': 'Leinster',
+    'Offaly': 'Leinster', 'Westmeath': 'Leinster', 'Wexford': 'Leinster', 'Wicklow': 'Leinster',
+    'Clare': 'Munster', 'Cork': 'Munster', 'Kerry': 'Munster', 'Limerick': 'Munster',
+    'Tipperary': 'Munster', 'Waterford': 'Munster',
+    'Galway': 'Connacht', 'Leitrim': 'Connacht', 'Mayo': 'Connacht', 'Roscommon': 'Connacht',
+    'Sligo': 'Connacht', 'London': 'Connacht', 'New York': 'Connacht',
+};
+
+const PROVINCIAL_VENUES: Record<string, { name: string; location: string; capacity: number }> = {
+    'Ulster':   { name: "St Tiernach's Park", location: 'Clones, Co. Monaghan', capacity: 36000 },
+    'Leinster': { name: 'Croke Park', location: 'Dublin', capacity: 82300 },
+    'Munster':  { name: 'FBD Semple Stadium', location: 'Thurles, Co. Tipperary', capacity: 45000 },
+    'Connacht': { name: 'Dr Hyde Park', location: 'Roscommon', capacity: 24000 },
+};
 
 const COUNTIES = [
     'Antrim', 'Armagh', 'Carlow', 'Cavan', 'Clare', 'Cork', 'Derry', 'Donegal', 'Down', 'Dublin',
@@ -278,7 +297,89 @@ export const generateCompetition = (teams: Team[], playerTeamId: string, code: C
         id: competitionId,
         name: `${code} Championship`,
         type: 'championship',
+        phase: 'group' as CompetitionPhase,
         teams: teams.map(t => t.id),
         fixtures,
+    };
+};
+
+export const generateNextKnockout = (
+    phase: CompetitionPhase,
+    playerTeam: Team,
+    allTeams: Team[],
+    playerTeamId: string,
+    _code: Code,
+): Competition => {
+    const competitionId = uuidv4();
+    const province = PROVINCE_MAP[playerTeam.county] ?? 'Connacht';
+
+    let opponent: Team | undefined;
+    let venue: { name: string; location: string; capacity: number };
+    let competitionName: string;
+    let playerIsHome = false;
+
+    const otherTeams = allTeams.filter(t => t.id !== playerTeamId);
+    const sameProvince = otherTeams.filter(t => (PROVINCE_MAP[t.county] ?? 'Connacht') === province);
+    const otherProvince = otherTeams.filter(t => (PROVINCE_MAP[t.county] ?? 'Connacht') !== province);
+
+    if (phase === 'provincial-sf') {
+        // Random team from same province
+        const pool = sameProvince.length > 0 ? sameProvince : otherTeams;
+        opponent = pool[Math.floor(Math.random() * pool.length)];
+        // Home draw: 50/50
+        playerIsHome = Math.random() < 0.5;
+        const homeStadium = playerIsHome
+            ? { name: playerTeam.stadium, location: playerTeam.stadiumLocation, capacity: playerTeam.stadiumCapacity }
+            : { name: opponent!.stadium, location: opponent!.stadiumLocation, capacity: opponent!.stadiumCapacity };
+        venue = homeStadium;
+        competitionName = `${province} Championship Semi-Final`;
+    } else if (phase === 'provincial-final') {
+        // Strong team from same province
+        const pool = (sameProvince.length > 0 ? sameProvince : otherTeams)
+            .sort((a, b) => b.rating - a.rating);
+        opponent = pool[Math.floor(Math.random() * Math.min(4, pool.length))];
+        venue = PROVINCIAL_VENUES[province] ?? { name: 'Croke Park', location: 'Dublin', capacity: 82300 };
+        competitionName = `${province} Championship Final`;
+    } else if (phase === 'all-ireland-sf') {
+        // Top team from a different province
+        const pool = (otherProvince.length > 0 ? otherProvince : otherTeams)
+            .sort((a, b) => b.rating - a.rating);
+        opponent = pool[Math.floor(Math.random() * Math.min(6, pool.length))];
+        venue = { name: 'Croke Park', location: 'Dublin', capacity: 82300 };
+        competitionName = 'All Ireland Semi-Final';
+    } else {
+        // all-ireland-final — high-rated team from any other province
+        const pool = (otherProvince.length > 0 ? otherProvince : otherTeams)
+            .sort((a, b) => b.rating - a.rating);
+        opponent = pool[Math.floor(Math.random() * Math.min(4, pool.length))];
+        venue = { name: 'Croke Park', location: 'Dublin', capacity: 82300 };
+        competitionName = 'All Ireland Final';
+    }
+
+    if (!opponent) opponent = otherTeams[0];
+
+    const matchDate = new Date();
+    matchDate.setDate(matchDate.getDate() + 21);
+
+    const fixture: Match = {
+        id: uuidv4(),
+        competitionId,
+        homeTeamId: playerIsHome ? playerTeamId : opponent.id,
+        awayTeamId: playerIsHome ? opponent.id : playerTeamId,
+        date: matchDate.toISOString(),
+        played: false,
+        events: [],
+        venue: venue.name,
+        venueCapacity: venue.capacity,
+    };
+
+    return {
+        id: competitionId,
+        name: competitionName,
+        type: 'championship',
+        phase,
+        province,
+        teams: [playerTeamId, opponent.id],
+        fixtures: [fixture],
     };
 };

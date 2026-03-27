@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, ClipboardList, Calendar, Settings, Trophy } from 'lucide-react';
+import { LayoutDashboard, Users, ClipboardList, Calendar, Settings, Trophy, BookOpen } from 'lucide-react';
 import clsx from 'clsx';
 
 interface LayoutProps {
@@ -38,6 +38,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <NavItem to="/tactics" icon={<ClipboardList size={20} />} label="Tactics" active={path === '/tactics'} />
                     <NavItem to="/fixtures" icon={<Calendar size={20} />} label="Fixtures" active={path === '/fixtures'} />
                     <NavItem to="/competitions" icon={<Trophy size={20} />} label="Competitions" active={path === '/competitions'} />
+                    <NavItem to="/career" icon={<BookOpen size={20} />} label="Career" active={path === '/career'} />
                     <NavItem to="/settings" icon={<Settings size={20} />} label="Settings" active={path === '/settings'} />
                 </nav>
 

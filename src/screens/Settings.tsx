@@ -66,7 +66,10 @@ export const Settings: React.FC = () => {
                             className="flex items-center space-x-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
                         >
                             <Save size={16} />
-                            <span>{nameSaved ? 'Sábháilte!' : 'Sábháil'}</span>
+                            <div className="flex flex-col items-start leading-tight">
+                                <span>{nameSaved ? 'Sábháilte!' : 'Sábháil'}</span>
+                                <span className="text-xs font-normal opacity-50">{nameSaved ? 'saved!' : 'save'}</span>
+                            </div>
                         </button>
                     </div>
                 </div>
@@ -122,7 +125,10 @@ export const Settings: React.FC = () => {
                             className="flex items-center space-x-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-800/50 rounded-lg font-medium transition-colors"
                         >
                             <Trash2 size={16} />
-                            <span>Tosaigh ó Thús — Start New Career</span>
+                            <div className="flex flex-col items-start leading-tight">
+                                <span>Tosaigh ó Thús</span>
+                                <span className="text-xs font-normal opacity-60">start new career</span>
+                            </div>
                         </button>
                     ) : (
                         <div className="space-y-2">
@@ -130,15 +136,17 @@ export const Settings: React.FC = () => {
                             <div className="flex space-x-2">
                                 <button
                                     onClick={handleReset}
-                                    className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg font-bold transition-colors"
+                                    className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg font-bold transition-colors flex flex-col items-center leading-tight"
                                 >
-                                    Tá, cinnte
+                                    <span>Tá, cinnte</span>
+                                    <span className="text-xs font-normal opacity-60">yes, sure</span>
                                 </button>
                                 <button
                                     onClick={() => setConfirmReset(false)}
-                                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-medium transition-colors"
+                                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-medium transition-colors flex flex-col items-center leading-tight"
                                 >
-                                    Níl, ar ais
+                                    <span>Níl, ar ais</span>
+                                    <span className="text-xs font-normal opacity-50">no, go back</span>
                                 </button>
                             </div>
                         </div>
