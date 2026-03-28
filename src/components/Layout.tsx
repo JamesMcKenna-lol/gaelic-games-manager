@@ -98,12 +98,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     </button>
                 </header>
 
-                <div className="flex-1 overflow-y-auto p-4 md:p-8">
+                <div className="flex-1 overflow-y-auto p-4 pb-24 md:pb-8 md:p-8">
                     {children}
                 </div>
 
                 {/* Mobile Bottom Nav */}
-                <nav className="md:hidden flex justify-around bg-slate-900 border-t border-slate-800 p-2 pb-safe">
+                <nav className="md:hidden fixed bottom-0 left-0 right-0 flex justify-around bg-slate-900 border-t border-slate-800 p-2" style={{ paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))' }}>
                     <Link to="/dashboard" className={clsx("p-2 rounded-lg", path === '/dashboard' ? "text-emerald-500" : "text-slate-400")}>
                         <LayoutDashboard size={24} />
                     </Link>
