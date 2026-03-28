@@ -110,8 +110,8 @@ export const Clubhouse: React.FC = () => {
                                     )}
                                 >
                                     <div>
-                                        <div className="font-bold text-white">{activity.irishName}</div>
-                                        <div className="text-slate-500 text-xs">{activity.name}</div>
+                                        <div className="font-bold text-white">{t(activity.irishName, activity.name)}</div>
+                                        {sub(activity.name) && <div className="text-slate-500 text-xs">{activity.name}</div>}
                                         <div className="text-slate-400 text-sm mt-1 leading-relaxed">{activity.description}</div>
                                     </div>
 
