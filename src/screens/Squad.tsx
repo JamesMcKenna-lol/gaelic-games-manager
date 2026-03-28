@@ -8,7 +8,7 @@ import clsx from 'clsx';
 
 export const Squad: React.FC = () => {
     const { save } = useGame();
-    const { t, sub } = useLanguage();
+    const { t } = useLanguage();
     const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
 
     if (!save) return null;
