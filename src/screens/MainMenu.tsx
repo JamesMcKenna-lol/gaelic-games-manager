@@ -66,17 +66,19 @@ export const MainMenu: React.FC = () => {
                             className="w-full py-4 px-6 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold transition-all transform hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] flex items-center justify-center space-x-2"
                         >
                             <PlayCircle size={20} />
-                            <span>Lean ar Aghaidh</span>
-                            <span className="text-emerald-200/60 text-sm font-normal ml-1">(Continue)</span>
+                            <div className="flex flex-col items-start">
+                                <span>Lean ar Aghaidh</span>
+                                <span className="text-emerald-200/50 text-xs font-normal">continue</span>
+                            </div>
                         </button>
                     )}
 
                     <button
                         onClick={handleNewCareer}
-                        className="w-full py-4 px-6 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold transition-all transform hover:scale-[1.02] ring-1 ring-slate-700 hover:ring-emerald-700"
+                        className="w-full py-4 px-6 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold transition-all transform hover:scale-[1.02] ring-1 ring-slate-700 hover:ring-emerald-700 flex flex-col items-center"
                     >
-                        🏐 Tosaigh Gairm Nua
-                        <span className="text-slate-400 text-sm font-normal ml-2">(New Career)</span>
+                        <span>🏐 Tosaigh Gairm Nua</span>
+                        <span className="text-slate-500 text-xs font-normal">start new career</span>
                     </button>
                 </div>
 
@@ -88,7 +90,7 @@ export const MainMenu: React.FC = () => {
                 </div>
 
                 <div className="text-xs text-slate-700 pt-2">
-                    v0.1.3 · Built with React & TypeScript · As Gaeilge
+                    v0.1.5 · Built with React & TypeScript · As Gaeilge
                 </div>
             </div>
         </div>

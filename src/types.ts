@@ -1,5 +1,12 @@
 export type Code = 'Football' | 'Hurling' | 'Camogie' | 'Ladies Football';
 
+export type CompetitionPhase =
+    | 'group'
+    | 'provincial-sf'
+    | 'provincial-final'
+    | 'all-ireland-sf'
+    | 'all-ireland-final';
+
 export interface Tactics {
     formation: string;
     attackingStyle: number; // 0-100, 0=defensive 100=attacking
@@ -76,8 +83,23 @@ export interface Competition {
     id: string;
     name: string;
     type: 'league' | 'championship';
+    phase: CompetitionPhase;
+    province?: string;
     teams: string[]; // Team IDs
     fixtures: Match[];
+}
+
+export interface SeasonRecord {
+    season: number;
+    county: string;
+    code: Code;
+    groupPos: number;
+    groupW: number;
+    groupD: number;
+    groupL: number;
+    furthestPhase: CompetitionPhase | 'eliminated';
+    allIrelandWinner: boolean;
+    provincialWinner: boolean;
 }
 
 export interface SaveGame {
@@ -91,4 +113,5 @@ export interface SaveGame {
     teams: Team[];
     players: Player[];
     tactics?: Tactics;
+    careerHistory: SeasonRecord[];
 }
