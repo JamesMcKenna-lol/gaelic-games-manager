@@ -1,5 +1,6 @@
 import React from 'react';
 import { useGame } from '../context/GameContext';
+import { useLanguage } from '../context/LanguageContext';
 import { Layout } from '../components/Layout';
 import type { CompetitionPhase } from '../types';
 import clsx from 'clsx';
@@ -37,6 +38,7 @@ const achievementBadge = (phase: string, allIrelandWinner: boolean, provincialWi
 
 export const Career: React.FC = () => {
     const { save } = useGame();
+    const { t, sub } = useLanguage();
 
     if (!save) return null;
 
@@ -60,8 +62,8 @@ export const Career: React.FC = () => {
             <div className="space-y-8 max-w-3xl">
                 {/* Header */}
                 <div>
-                    <h1 className="text-3xl font-bold text-white">Gairm</h1>
-                    <p className="text-slate-400 text-sm">career history</p>
+                    <h1 className="text-3xl font-bold text-white">{t('Gairm', 'Career')}</h1>
+                    {sub('career history') && <p className="text-slate-400 text-sm">{sub('career history')}</p>}
                     {team && (
                         <p className="text-emerald-500 font-medium mt-1">
                             {save.managerName} · {team.name} · {save.code}
@@ -74,15 +76,15 @@ export const Career: React.FC = () => {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center">
                             <div className="text-2xl font-black text-white">{totalSeasons}</div>
-                            <div className="text-xs text-slate-500 mt-1">Séasúir <span className="block">seasons</span></div>
+                            <div className="text-xs text-slate-500 mt-1">{t('Séasúir', 'Seasons')}</div>
                         </div>
                         <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center">
                             <div className={clsx('text-2xl font-black', allIrelandWins > 0 ? 'text-yellow-400' : 'text-white')}>{allIrelandWins}</div>
-                            <div className="text-xs text-slate-500 mt-1">Craobh na hÉireann <span className="block">All Irelands</span></div>
+                            <div className="text-xs text-slate-500 mt-1">{t('Craobh na hÉireann', 'All Irelands')}</div>
                         </div>
                         <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center">
                             <div className={clsx('text-2xl font-black', provincialWins > 0 ? 'text-emerald-400' : 'text-white')}>{provincialWins}</div>
-                            <div className="text-xs text-slate-500 mt-1">Craobh Cúige <span className="block">Provincial titles</span></div>
+                            <div className="text-xs text-slate-500 mt-1">{t('Craobh Cúige', 'Provincial titles')}</div>
                         </div>
                         <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center">
                             <div className="text-lg font-black text-white font-mono">{totalW}W {totalD}D {totalL}L</div>
@@ -107,7 +109,8 @@ export const Career: React.FC = () => {
                 {/* Season by season */}
                 <div className="space-y-4">
                     <h2 className="text-lg font-bold text-white">
-                        Taifead Séasúir <span className="text-slate-500 text-sm font-normal">· season by season</span>
+                        {t('Taifead Séasúir', 'Season by Season')}
+                        {sub('season by season') && <span className="text-slate-500 text-sm font-normal"> · {sub('season by season')}</span>}
                     </h2>
 
                     {history.length === 0 ? (

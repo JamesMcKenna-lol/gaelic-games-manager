@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
+import { useLanguage } from '../context/LanguageContext';
 import { Trophy, PlayCircle } from 'lucide-react';
 import { resumeAudio } from '../utils/sounds';
 
@@ -17,6 +18,7 @@ const randomSeanfhocal = SEANFHOCAIL[Math.floor(Math.random() * SEANFHOCAIL.leng
 export const MainMenu: React.FC = () => {
     const navigate = useNavigate();
     const { hasSave, loadGame } = useGame();
+    const { lang, t, sub } = useLanguage();
 
     const handleContinue = () => {
         resumeAudio();
@@ -49,14 +51,19 @@ export const MainMenu: React.FC = () => {
                         </div>
                     </div>
                     <div className="text-emerald-500/70 text-sm font-medium tracking-widest uppercase">
-                        Fáilte go
+                        {t('Fáilte go', 'Welcome to')}
                     </div>
                     <h1 className="text-4xl font-black text-white tracking-tight leading-tight">
-                        Gaelic Games<br />
-                        <span className="text-emerald-400">Manager</span>
+                        {t('Bainisteoir na', 'Gaelic Games')}<br />
+                        <span className="text-emerald-400">{t('nGael', 'Manager')}</span>
                     </h1>
-                    <p className="text-slate-400 text-sm">Bainistigh do chontae go glóir!</p>
-                    <p className="text-slate-600 text-xs italic px-4">{randomSeanfhocal}</p>
+                    <p className="text-slate-400 text-sm">
+                        {t('Bainistigh do chontae go glóir!', 'Manage your county to glory!')}
+                    </p>
+                    {/* Only show seanfhocal in hybrid/gaeilge mode */}
+                    {lang !== 'english' && (
+                        <p className="text-slate-600 text-xs italic px-4">{randomSeanfhocal}</p>
+                    )}
                 </div>
 
                 <div className="space-y-3">
@@ -67,8 +74,8 @@ export const MainMenu: React.FC = () => {
                         >
                             <PlayCircle size={20} />
                             <div className="flex flex-col items-start">
-                                <span>Lean ar Aghaidh</span>
-                                <span className="text-emerald-200/50 text-xs font-normal">continue</span>
+                                <span>{t('Lean ar Aghaidh', 'Continue')}</span>
+                                {sub('continue') && <span className="text-emerald-200/50 text-xs font-normal">{sub('continue')}</span>}
                             </div>
                         </button>
                     )}
@@ -77,20 +84,31 @@ export const MainMenu: React.FC = () => {
                         onClick={handleNewCareer}
                         className="w-full py-4 px-6 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold transition-all transform hover:scale-[1.02] ring-1 ring-slate-700 hover:ring-emerald-700 flex flex-col items-center"
                     >
-                        <span>🏐 Tosaigh Gairm Nua</span>
-                        <span className="text-slate-500 text-xs font-normal">start new career</span>
+                        <span>🏐 {t('Tosaigh Gairm Nua', 'Start New Career')}</span>
+                        {sub('start new career') && <span className="text-slate-500 text-xs font-normal">{sub('start new career')}</span>}
                     </button>
                 </div>
 
-                {/* Irish phrase of the day */}
-                <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 text-left space-y-1">
-                    <div className="text-xs text-emerald-500/70 font-semibold uppercase tracking-wide">Focal na Láe</div>
-                    <div className="text-sm text-slate-300 font-medium">CÚL = Goal &nbsp;·&nbsp; Pointe = Point &nbsp;·&nbsp; Leathan = Wide</div>
-                    <div className="text-xs text-slate-500">Leath-am = Half-time &nbsp;·&nbsp; Craobh = Championship</div>
-                </div>
+                {/* Focal na Láe — only in hybrid/gaeilge */}
+                {lang !== 'english' && (
+                    <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 text-left space-y-1">
+                        <div className="text-xs text-emerald-500/70 font-semibold uppercase tracking-wide">
+                            {t('Focal na Láe', 'Word of the Day')}
+                        </div>
+                        <div className="text-sm text-slate-300 font-medium">CÚL = Goal &nbsp;·&nbsp; Pointe = Point &nbsp;·&nbsp; Leathan = Wide</div>
+                        <div className="text-xs text-slate-500">Leath-am = Half-time &nbsp;·&nbsp; Craobh = Championship</div>
+                    </div>
+                )}
+                {lang === 'english' && (
+                    <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 text-left space-y-1">
+                        <div className="text-xs text-emerald-500/70 font-semibold uppercase tracking-wide">Quick Glossary</div>
+                        <div className="text-sm text-slate-300 font-medium">Goal (Cúl) = 3 pts &nbsp;·&nbsp; Point (Pointe) = 1 pt</div>
+                        <div className="text-xs text-slate-500">Half-time · Championship · Group Stage</div>
+                    </div>
+                )}
 
                 <div className="text-xs text-slate-700 pt-2">
-                    v0.1.6 · Built with React & TypeScript · As Gaeilge
+                    v0.1.7 · Built with React & TypeScript · As Gaeilge
                 </div>
             </div>
         </div>

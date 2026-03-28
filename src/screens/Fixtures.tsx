@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useGame } from '../context/GameContext';
+import { useLanguage } from '../context/LanguageContext';
 import { Layout } from '../components/Layout';
 import { Calendar, MapPin } from 'lucide-react';
 import { formatScore } from '../utils/engine';
@@ -17,6 +18,7 @@ const PHASE_EN: Record<CompetitionPhase, string> = {
 
 export const Fixtures: React.FC = () => {
     const { save, updateMatch } = useGame();
+    const { t, sub } = useLanguage();
     const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
 
     const { sections, activeMatch, homeTeam, awayTeam, homePlayers, awayPlayers } = useMemo(() => {
@@ -68,9 +70,9 @@ export const Fixtures: React.FC = () => {
         <Layout>
             <div className="space-y-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-white">Cláracha & Torthaí</h1>
-                    <p className="text-slate-400 text-sm">fixtures & results</p>
-                    <p className="text-slate-500 text-sm mt-1">{team?.name} • {save.season} Season</p>
+                    <h1 className="text-3xl font-bold text-white">{t('Cláracha & Torthaí', 'Fixtures & Results')}</h1>
+                    {sub('fixtures & results') && <p className="text-slate-400 text-sm">{sub('fixtures & results')}</p>}
+                    <p className="text-slate-500 text-sm mt-1">{team?.name} • {save.season} {t('Séasúr', 'Season')}</p>
                 </div>
 
                 {sections.map(({ comp, phase, upcoming, results }) => {
@@ -90,8 +92,8 @@ export const Fixtures: React.FC = () => {
                                     'text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full',
                                     isCurrentComp ? 'text-emerald-400 bg-emerald-900/30 border border-emerald-800' : 'text-slate-500 bg-slate-900'
                                 )}>
-                                    {phaseLabel}
-                                    {phaseLabel !== phaseEn && (
+                                    {t(phaseLabel, phaseEn)}
+                                    {sub(phaseEn) && phaseLabel !== phaseEn && (
                                         <span className="text-slate-600 font-normal ml-1 normal-case tracking-normal">· {phaseEn}</span>
                                     )}
                                 </div>
@@ -124,12 +126,12 @@ export const Fixtures: React.FC = () => {
                                                             <span className="text-slate-400 text-sm">{formatDate(fixture.date)}</span>
                                                             <div className="flex items-center space-x-1">
                                                                 <MapPin size={13} className="text-slate-500" />
-                                                                <span className="text-xs text-slate-500">{isHome ? 'Home' : 'Away'}</span>
+                                                                <span className="text-xs text-slate-500">{isHome ? t('Baile', 'Home') : t('As Baile', 'Away')}</span>
                                                             </div>
                                                             {isNext && (
                                                                 <span className="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                                                                    An Chéad Cluiche
-                                                                    <span className="text-emerald-700 font-normal ml-1">· next</span>
+                                                                    {t('An Chéad Cluiche', 'Next Match')}
+                                                                    {sub('next') && <span className="text-emerald-700 font-normal ml-1">· {sub('next')}</span>}
                                                                 </span>
                                                             )}
                                                         </div>
@@ -162,8 +164,8 @@ export const Fixtures: React.FC = () => {
                                                                 : 'bg-slate-700 hover:bg-slate-600 text-white'
                                                         )}
                                                     >
-                                                        <span>Imir! ▶</span>
-                                                        <span className="text-xs font-normal opacity-50">play</span>
+                                                        <span>{t('Imir! ▶', 'Play! ▶')}</span>
+                                                        {sub('play') && <span className="text-xs font-normal opacity-50">{sub('play')}</span>}
                                                     </button>
                                                 </div>
                                             </div>
@@ -191,7 +193,7 @@ export const Fixtures: React.FC = () => {
                                                     <span className="text-xs text-slate-600">{fixture.venue}</span>
                                                     <div className="flex items-center space-x-1">
                                                         <MapPin size={13} className="text-slate-500" />
-                                                        <span className="text-xs text-slate-500">{isHome ? 'Home' : 'Away'}</span>
+                                                        <span className="text-xs text-slate-500">{isHome ? t('Baile', 'Home') : t('As Baile', 'Away')}</span>
                                                     </div>
                                                     <span className={clsx(
                                                         'px-2 py-0.5 text-xs font-bold rounded',
@@ -199,7 +201,7 @@ export const Fixtures: React.FC = () => {
                                                         outcome === 'D' ? 'bg-yellow-500/10 text-yellow-400' :
                                                         'bg-red-500/10 text-red-400'
                                                     )}>
-                                                        {outcome === 'W' ? 'Win' : outcome === 'D' ? 'Draw' : 'Loss'}
+                                                        {outcome === 'W' ? t('Bua', 'Win') : outcome === 'D' ? t('Cluiche Cothrom', 'Draw') : t('Caillte', 'Loss')}
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center space-x-4">

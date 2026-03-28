@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useGame } from '../context/GameContext';
+import { useLanguage } from '../context/LanguageContext';
 import { Layout } from '../components/Layout';
 import type { Player } from '../types';
 import { ChevronRight } from 'lucide-react';
@@ -7,6 +8,7 @@ import clsx from 'clsx';
 
 export const Squad: React.FC = () => {
     const { save } = useGame();
+    const { t, sub } = useLanguage();
     const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
 
     if (!save) return null;
@@ -18,8 +20,8 @@ export const Squad: React.FC = () => {
         <Layout>
             <div className="space-y-6">
                 <div>
-                    <h1 className="text-3xl font-bold text-white">Squad</h1>
-                    <p className="text-slate-400">{teamPlayers.length} players</p>
+                    <h1 className="text-3xl font-bold text-white">{t('Foireann', 'Squad')}</h1>
+                    <p className="text-slate-400">{teamPlayers.length} {t('imreoirí', 'players')}</p>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
