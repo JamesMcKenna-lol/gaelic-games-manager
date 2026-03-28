@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
 import { Layout } from '../components/Layout';
-import { Calendar, TrendingUp, Activity, Shield, PlayCircle, RefreshCw, ChevronRight, Trophy } from 'lucide-react';
+import { Calendar, TrendingUp, Activity, Shield, PlayCircle, RefreshCw, ChevronRight, Trophy, AlertTriangle, X } from 'lucide-react';
 import { formatScore } from '../utils/engine';
 import type { CompetitionPhase } from '../types';
 import clsx from 'clsx';
@@ -32,8 +32,15 @@ const NEXT_PHASE: Record<CompetitionPhase, CompetitionPhase | null> = {
     'all-ireland-final': null,
 };
 
+const SEVERITY_STYLE = {
+    minor: { border: 'border-yellow-800', bg: 'bg-yellow-900/20', title: 'text-yellow-300', icon: 'text-yellow-400' },
+    moderate: { border: 'border-orange-800', bg: 'bg-orange-900/20', title: 'text-orange-300', icon: 'text-orange-400' },
+    major: { border: 'border-red-800', bg: 'bg-red-900/20', title: 'text-red-300', icon: 'text-red-400' },
+    catastrophic: { border: 'border-red-700', bg: 'bg-red-900/30', title: 'text-red-200', icon: 'text-red-300' },
+};
+
 export const Dashboard: React.FC = () => {
-    const { save, startNewSeason, advancePhase } = useGame();
+    const { save, startNewSeason, advancePhase, dismissScandal } = useGame();
     const navigate = useNavigate();
 
     const data = useMemo(() => {
@@ -214,6 +221,40 @@ export const Dashboard: React.FC = () => {
                         <div className="font-semibold text-white">{save.managerName}</div>
                     </div>
                 </div>
+
+                {/* ── Scandal alerts ── */}
+                {(save.scandals ?? []).filter(s => !s.dismissed && s.season === save.season).map(scandal => {
+                    const style = SEVERITY_STYLE[scandal.severity];
+                    return (
+                        <div key={scandal.id} className={clsx('border rounded-xl p-4 flex items-start gap-3', style.border, style.bg)}>
+                            <AlertTriangle size={18} className={clsx('flex-shrink-0 mt-0.5', style.icon)} />
+                            <div className="flex-1 min-w-0">
+                                <div className={clsx('font-bold text-sm flex items-center gap-2', style.title)}>
+                                    🗞️ {scandal.title}
+                                    <span className="text-xs font-normal opacity-60 uppercase tracking-wide">· {scandal.severity}</span>
+                                </div>
+                                <div className="text-slate-400 text-xs mt-1 leading-relaxed">{scandal.description}</div>
+                                <div className={clsx('text-xs mt-1.5 font-medium', style.icon)}>
+                                    Morale impact: {scandal.moraleImpact} pts
+                                    {scandal.target === 'player' && scandal.affectedPlayerIds && (
+                                        <span className="text-slate-500 ml-2">·
+                                            {' '}{scandal.affectedPlayerIds.length} player{scandal.affectedPlayerIds.length > 1 ? 's' : ''} affected
+                                        </span>
+                                    )}
+                                    {scandal.target === 'team' && <span className="text-slate-500 ml-2">· whole squad affected</span>}
+                                    {scandal.target === 'manager' && <span className="text-slate-500 ml-2">· board confidence hit</span>}
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => dismissScandal(scandal.id)}
+                                className="text-slate-600 hover:text-slate-300 flex-shrink-0"
+                                title="Dismiss"
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
+                    );
+                })}
 
                 {/* ── Path to All Ireland ── */}
                 <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">

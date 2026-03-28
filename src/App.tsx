@@ -7,6 +7,8 @@ import { Fixtures } from './screens/Fixtures';
 import { Tactics } from './screens/Tactics';
 import { Settings } from './screens/Settings';
 import { Career } from './screens/Career';
+import { Training } from './screens/Training';
+import { Clubhouse } from './screens/Clubhouse';
 import { useGame } from './context/GameContext';
 
 // Protected Route wrapper
@@ -38,6 +40,8 @@ function App() {
         <Route path="/fixtures" element={<ProtectedRoute><Fixtures /></ProtectedRoute>} />
         <Route path="/competitions" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/career" element={<ProtectedRoute><Career /></ProtectedRoute>} />
+        <Route path="/training" element={<ProtectedRoute><Training /></ProtectedRoute>} />
+        <Route path="/clubhouse" element={<ProtectedRoute><Clubhouse /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>

@@ -90,7 +90,7 @@ export const MainMenu: React.FC = () => {
                 </div>
 
                 <div className="text-xs text-slate-700 pt-2">
-                    v0.1.5 · Built with React & TypeScript · As Gaeilge
+                    v0.1.6 · Built with React & TypeScript · As Gaeilge
                 </div>
             </div>
         </div>
