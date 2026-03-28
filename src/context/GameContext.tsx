@@ -135,6 +135,13 @@ const buildSeasonRecord = (save: SaveGame): SeasonRecord => {
     };
 };
 
+// Substitute {p1}, {p2}, {manager} placeholders in a scandal string
+const fillTemplate = (text: string, names: { p1?: string; p2?: string; manager?: string }): string =>
+    text
+        .replace(/\{p1\}/g, names.p1 ?? 'a player')
+        .replace(/\{p2\}/g, names.p2 ?? 'another player')
+        .replace(/\{manager\}/g, names.manager ?? 'the manager');
+
 // Pick a scandal and apply it to players/team
 const triggerScandal = (save: SaveGame, matchId: string): SaveGame => {
     const roll = Math.random();
@@ -145,10 +152,10 @@ const triggerScandal = (save: SaveGame, matchId: string): SaveGame => {
 
     let affectedPlayerIds: string[] | undefined;
     let updatedPlayers = save.players;
+    const shuffled = [...teamPlayers].sort(() => Math.random() - 0.5);
 
     if (template.target === 'player' && teamPlayers.length > 0) {
         const count = Math.min(template.affectedCount ?? 1, teamPlayers.length);
-        const shuffled = [...teamPlayers].sort(() => Math.random() - 0.5);
         affectedPlayerIds = shuffled.slice(0, count).map(p => p.id);
 
         // Apply morale impact to affected players (non-uniform: each gets 50-100% of the impact)
@@ -167,10 +174,15 @@ const triggerScandal = (save: SaveGame, matchId: string): SaveGame => {
     }
     // manager target: morale impact visible in board confidence — no direct player change
 
+    // Resolve real names for placeholders
+    const p1Name = shuffled[0]?.name;
+    const p2Name = shuffled[1]?.name;
+    const managerName = save.managerName;
+
     const scandal: ScandalEvent = {
         id: uuidv4(),
         title: template.title,
-        description: template.description,
+        description: fillTemplate(template.description, { p1: p1Name, p2: p2Name, manager: managerName }),
         severity: template.severity,
         moraleImpact: template.moraleImpact,
         target: template.target,
