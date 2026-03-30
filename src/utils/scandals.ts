@@ -9,31 +9,36 @@ export interface ScandalTemplate {
     affectedCount?: number; // if target === 'player', how many players affected
 }
 
+// Placeholders substituted at runtime:
+//   {p1}      — first affected player's full name
+//   {p2}      — second affected player's full name
+//   {manager} — manager's name
+
 export const SCANDAL_TEMPLATES: ScandalTemplate[] = [
     // MINOR (-5 to -10 morale)
     {
         title: 'Late Night Spotted',
-        description: 'A few players were seen leaving a pub well after curfew the night before training. Nothing serious, but word has gotten around the county board.',
+        description: '{p1} and {p2} were seen leaving a pub well after curfew the night before training. Nothing serious, but word has gotten around the county board.',
         severity: 'minor', moraleImpact: -6, target: 'player', affectedCount: 2,
     },
     {
         title: 'Training Row',
-        description: 'A heated argument broke out on the training pitch between two players. It was kept mostly internal but the mood in the dressing room has soured.',
+        description: 'A heated argument broke out on the training pitch between {p1} and {p2}. It was kept mostly internal but the mood in the dressing room has soured.',
         severity: 'minor', moraleImpact: -8, target: 'player', affectedCount: 2,
     },
     {
         title: 'Social Media Slip',
-        description: 'A player posted a photo that raised eyebrows in club circles. Deleted quickly but not before screenshots made the rounds on GAA Twitter.',
+        description: '{p1} posted a photo that raised eyebrows in club circles. Deleted quickly but not before screenshots made the rounds on GAA Twitter.',
         severity: 'minor', moraleImpact: -5, target: 'player', affectedCount: 1,
     },
     {
         title: 'Missed Training Session',
-        description: 'One of the senior players skipped training without notifying the management team. The lads noticed.',
+        description: '{p1} skipped training without notifying the management team. The rest of the lads noticed.',
         severity: 'minor', moraleImpact: -7, target: 'player', affectedCount: 1,
     },
     {
         title: 'Club Funding Complaint',
-        description: 'A local councillor went to the papers complaining the county board was favouring your club in grant allocations. Storm in a teacup but distracting.',
+        description: 'A local councillor went to the papers complaining the county board was favouring your club in grant allocations. Storm in a teacup, but distracting for {manager}.',
         severity: 'minor', moraleImpact: -5, target: 'manager',
     },
     {
@@ -53,7 +58,7 @@ export const SCANDAL_TEMPLATES: ScandalTemplate[] = [
     },
     {
         title: 'Radio Interview Controversy',
-        description: 'You made an offhand remark on Raidió na Gaeltachta that didn\'t land well. The county board asked for clarification.',
+        description: '{manager} made an offhand remark on Raidió na Gaeltachta that didn\'t land well. The county board asked for clarification.',
         severity: 'minor', moraleImpact: -7, target: 'manager',
     },
     {
@@ -65,17 +70,17 @@ export const SCANDAL_TEMPLATES: ScandalTemplate[] = [
     // MODERATE (-15 to -20 morale)
     {
         title: 'Drink Driving Arrest',
-        description: 'A panel member was arrested for drink driving after a night out. The county board has launched an internal review.',
+        description: '{p1} was arrested for drink driving after a night out. The county board has launched an internal review.',
         severity: 'moderate', moraleImpact: -18, target: 'player', affectedCount: 1,
     },
     {
         title: 'Transfer Agitation',
-        description: 'Your best forward has lodged a transfer request. He wants to play for a neighbouring county. The story has broken in the Irish Examiner.',
+        description: '{p1} has lodged a transfer request and wants to play for a neighbouring county. The story has broken in the Irish Examiner.',
         severity: 'moderate', moraleImpact: -17, target: 'player', affectedCount: 1,
     },
     {
         title: 'County Board Power Struggle',
-        description: 'A faction on the county board is questioning your training methods and threatening to intervene in team selection. Classic GAA politics.',
+        description: 'A faction on the county board is questioning {manager}\'s training methods and threatening to intervene in team selection. Classic GAA politics.',
         severity: 'moderate', moraleImpact: -15, target: 'manager',
     },
     {
@@ -90,7 +95,7 @@ export const SCANDAL_TEMPLATES: ScandalTemplate[] = [
     },
     {
         title: 'Referee Allegation',
-        description: 'You were quoted accusing a referee of bias after last week\'s match. The GAA disciplinary committee has opened a file.',
+        description: '{manager} was quoted accusing a referee of bias after last week\'s match. The GAA disciplinary committee has opened a file.',
         severity: 'moderate', moraleImpact: -16, target: 'manager',
     },
     {
@@ -105,34 +110,34 @@ export const SCANDAL_TEMPLATES: ScandalTemplate[] = [
     },
     {
         title: 'Bogus Expenses Claim',
-        description: 'A player was found to have submitted inflated travel expense claims. The county board have reprimanded them publicly.',
+        description: '{p1} was found to have submitted inflated travel expense claims. The county board have reprimanded them publicly.',
         severity: 'moderate', moraleImpact: -17, target: 'player', affectedCount: 1,
     },
     {
         title: 'Journalist Ambush',
-        description: 'A Sunday paper ran a piece suggesting the manager\'s tactics are "ten years out of date". Former players were quoted. The dressing room is rattled.',
+        description: 'A Sunday paper ran a piece suggesting {manager}\'s tactics are "ten years out of date". Former players were quoted. The dressing room is rattled.',
         severity: 'moderate', moraleImpact: -15, target: 'manager',
     },
 
     // MAJOR (-25 to -35 morale)
     {
         title: 'Match Fixing Allegation',
-        description: 'A tabloid alleged that a recent defeat was deliberately arranged to benefit a betting syndicate. Garda have been contacted. The county is in shock.',
+        description: 'A tabloid alleged that a recent defeat was deliberately arranged to benefit a betting syndicate. Gardaí have been contacted. The county is in shock.',
         severity: 'major', moraleImpact: -32, target: 'team',
     },
     {
         title: 'Doping Positive Test',
-        description: 'A player has returned a positive result for a banned substance. The player claims it was a contaminated supplement. Croke Park has suspended them pending investigation.',
+        description: '{p1} has returned a positive result for a banned substance. The player claims it was a contaminated supplement. Croke Park has suspended them pending investigation.',
         severity: 'major', moraleImpact: -30, target: 'player', affectedCount: 1,
     },
     {
         title: 'Violent Conduct Ban',
-        description: 'Your captain received a lengthy suspension after a post-match altercation with an opponent. The incident was caught on camera and went viral.',
+        description: '{p1} received a lengthy suspension after a post-match altercation with an opponent. The incident was caught on camera and went viral.',
         severity: 'major', moraleImpact: -28, target: 'player', affectedCount: 1,
     },
     {
         title: 'County Board Vote of No Confidence',
-        description: 'The county board called an emergency meeting and passed a motion of no confidence in your management approach. Your position is under serious threat.',
+        description: 'The county board called an emergency meeting and passed a motion of no confidence in {manager}\'s management approach. The position is under serious threat.',
         severity: 'major', moraleImpact: -35, target: 'manager',
     },
     {
@@ -142,7 +147,7 @@ export const SCANDAL_TEMPLATES: ScandalTemplate[] = [
     },
     {
         title: 'Training Ground Brawl',
-        description: 'A serious physical altercation broke out between two players at training and could not be kept quiet. One required medical attention. The county is talking about nothing else.',
+        description: 'A serious physical altercation broke out between {p1} and {p2} at training and could not be kept quiet. One required medical attention. The county is talking about nothing else.',
         severity: 'major', moraleImpact: -29, target: 'player', affectedCount: 3,
     },
     {
@@ -152,7 +157,7 @@ export const SCANDAL_TEMPLATES: ScandalTemplate[] = [
     },
     {
         title: 'Selection Controversy',
-        description: 'You dropped a county legend without explanation. His family went to the press. The controversy has split the county\'s supporters.',
+        description: '{manager} dropped a county legend without explanation. His family went to the press. The controversy has split the county\'s supporters.',
         severity: 'major', moraleImpact: -27, target: 'manager',
     },
     {
@@ -162,11 +167,9 @@ export const SCANDAL_TEMPLATES: ScandalTemplate[] = [
     },
     {
         title: 'Leaked Dressing Room Audio',
-        description: 'Audio of your half-time team talk was leaked online. It contained strong language and criticism of individual players by name.',
+        description: 'Audio of {manager}\'s half-time team talk was leaked online. It contained strong language and criticism of individual players by name.',
         severity: 'major', moraleImpact: -26, target: 'manager',
     },
-
-    // MAJOR continued
     {
         title: 'Championship Eligibility Dispute',
         description: 'An opposing county lodged a protest claiming one of your players was ineligible to play. The GAA are reviewing match results. Season in jeopardy.',
@@ -181,12 +184,12 @@ export const SCANDAL_TEMPLATES: ScandalTemplate[] = [
     // CATASTROPHIC (-40 to -50 morale)
     {
         title: 'Criminal Charges Against Star Player',
-        description: 'Your marquee forward has been charged with assault following an incident outside a Galway nightclub. They have voluntarily stepped away from the squad.',
+        description: '{p1} has been charged with assault following an incident outside a Galway nightclub. They have voluntarily stepped away from the squad.',
         severity: 'catastrophic', moraleImpact: -45, target: 'player', affectedCount: 1,
     },
     {
         title: 'Match Fixing Conviction',
-        description: 'A former backroom member has been convicted of match fixing. Though removed from the setup before your tenure, the county\'s name is destroyed in the press.',
+        description: 'A former backroom member has been convicted of match fixing. Though removed from the setup before {manager}\'s tenure, the county\'s name is destroyed in the press.',
         severity: 'catastrophic', moraleImpact: -48, target: 'team',
     },
     {
@@ -196,7 +199,7 @@ export const SCANDAL_TEMPLATES: ScandalTemplate[] = [
     },
     {
         title: 'Manager Resignation Demanded',
-        description: 'Over a thousand supporters have signed a petition calling for your immediate resignation. Local TD\'s are weighing in. Your future is in serious doubt.',
+        description: 'Over a thousand supporters have signed a petition calling for {manager}\'s immediate resignation. Local TDs are weighing in. The future is in serious doubt.',
         severity: 'catastrophic', moraleImpact: -42, target: 'manager',
     },
     {
@@ -206,13 +209,13 @@ export const SCANDAL_TEMPLATES: ScandalTemplate[] = [
     },
     {
         title: 'Serious Player Welfare Failure',
-        description: 'A player collapsed during training and it emerged that warning signs had been ignored for weeks. The GAA launched a full investigation into player welfare protocols.',
-        severity: 'catastrophic', moraleImpact: -44, target: 'team',
+        description: '{p1} collapsed during training and it emerged that warning signs had been ignored for weeks. The GAA launched a full investigation into player welfare protocols.',
+        severity: 'catastrophic', moraleImpact: -44, target: 'player', affectedCount: 1,
     },
     {
         title: 'Player Death Scare',
-        description: 'A player suffered a serious cardiac event during a training drill. He survived, but the incident has left the squad badly shaken and county devastated.',
-        severity: 'catastrophic', moraleImpact: -40, target: 'team',
+        description: '{p1} suffered a serious cardiac event during a training drill. He survived, but the incident has left the squad badly shaken and the county devastated.',
+        severity: 'catastrophic', moraleImpact: -40, target: 'player', affectedCount: 1,
     },
     {
         title: 'County Expulsion Threatened',
@@ -233,17 +236,17 @@ export const SCANDAL_TEMPLATES: ScandalTemplate[] = [
     // Extra: manager-focused minor/moderate
     {
         title: 'Tactics Questioned Publicly',
-        description: 'A former All-Ireland winner went on Newstalk to call your defensive setup "an embarrassment to the county". The lads heard every word.',
+        description: 'A former All-Ireland winner went on Newstalk to call {manager}\'s defensive setup "an embarrassment to the county". The lads heard every word.',
         severity: 'minor', moraleImpact: -9, target: 'manager',
     },
     {
         title: 'Selector Feud',
-        description: 'One of your selectors resigned and told the Connacht Tribune you overruled them on key selections all season. Backroom unity is gone.',
+        description: 'One of {manager}\'s selectors resigned and told the Connacht Tribune they were overruled on key selections all season. Backroom unity is gone.',
         severity: 'moderate', moraleImpact: -16, target: 'manager',
     },
     {
         title: 'Academy Neglect Claims',
-        description: 'The under-21 manager claimed you\'ve been poaching his best players without communication. The county board held a summit.',
+        description: 'The under-21 manager claimed {manager} has been poaching his best players without communication. The county board held a summit.',
         severity: 'minor', moraleImpact: -7, target: 'manager',
     },
     {
@@ -253,22 +256,22 @@ export const SCANDAL_TEMPLATES: ScandalTemplate[] = [
     },
     {
         title: 'Fan Protest at Training',
-        description: 'A small group of supporters staged a protest outside the training ground, calling for fresher blood in the squad. TV cameras were present.',
+        description: 'A small group of supporters staged a protest outside the training ground, calling for {manager} to be replaced. TV cameras were present.',
         severity: 'minor', moraleImpact: -10, target: 'manager',
     },
     {
         title: 'Broken Handshake Controversy',
-        description: 'You were photographed walking past the opposing manager without shaking hands after a match. The GAA code of conduct committee is investigating.',
+        description: '{manager} was photographed walking past the opposing manager without shaking hands after a match. The GAA code of conduct committee is investigating.',
         severity: 'minor', moraleImpact: -6, target: 'manager',
     },
     {
         title: 'Amateur Status Violation',
-        description: 'A player accepted payment for a personal appearance while in county colours, violating GAA amateur status rules. A fine has been issued.',
+        description: '{p1} accepted payment for a personal appearance while in county colours, violating GAA amateur status rules. A fine has been issued.',
         severity: 'moderate', moraleImpact: -14, target: 'player', affectedCount: 1,
     },
     {
         title: 'Illegal Recruitment Allegation',
-        description: 'A rival county has accused you of inducing a college student to declare for your county using financial incentives. The GAA are investigating.',
+        description: 'A rival county has accused {manager} of inducing a college student to declare for the county using financial incentives. The GAA are investigating.',
         severity: 'major', moraleImpact: -28, target: 'manager',
     },
 ];

@@ -28,6 +28,12 @@ const WIDE_TEXTS = (scorer: string, team: string) => [
     `Isteach sa slua! ${scorer} ag caitheamh leathan. Amú!`,
 ];
 
+const scoringMultiplier = (code: Team['code']): number => {
+    if (code === 'Hurling') return 1.5;
+    if (code === 'Camogie') return 1.2;
+    return 1.0;
+};
+
 export const simulateMatch = (
     match: Match,
     homeTeam: Team,
@@ -35,6 +41,7 @@ export const simulateMatch = (
     homePlayers: Player[],
     awayPlayers: Player[]
 ): Match => {
+    const scoreMulti = scoringMultiplier(homeTeam.code);
     const events: MatchEvent[] = [];
     const stats: MatchStats = {
         homeScore: { goals: 0, points: 0 },
@@ -62,7 +69,7 @@ export const simulateMatch = (
     stats.possession.away = 100 - stats.possession.home;
 
     for (let minute = 1; minute <= 70; minute++) {
-        if (Math.random() < 0.18) {
+        if (Math.random() < 0.18 * scoreMulti) {
             const isHome = Math.random() < (homeStrength / totalStrength);
             const team = isHome ? homeTeam : awayTeam;
             const teamId = isHome ? match.homeTeamId : match.awayTeamId;

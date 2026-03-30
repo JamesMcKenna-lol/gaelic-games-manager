@@ -21,9 +21,9 @@ export const Fixtures: React.FC = () => {
     const { t, sub } = useLanguage();
     const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
 
-    const { sections, activeMatch, homeTeam, awayTeam, homePlayers, awayPlayers } = useMemo(() => {
+    const { sections, nextFixture, nextFixtureComp, activeMatch, homeTeam, awayTeam, homePlayers, awayPlayers } = useMemo(() => {
         if (!save || save.competitions.length === 0) {
-            return { sections: [], activeMatch: null, homeTeam: null, awayTeam: null, homePlayers: [], awayPlayers: [] };
+            return { sections: [], nextFixture: null, nextFixtureComp: null, activeMatch: null, homeTeam: null, awayTeam: null, homePlayers: [], awayPlayers: [] };
         }
 
         const teamId = save.teamId;
@@ -41,6 +41,16 @@ export const Fixtures: React.FC = () => {
             return { comp, phase, upcoming, results };
         });
 
+        // Find the absolute next unplayed fixture across all competitions
+        const allUpcoming = save.competitions.flatMap(comp =>
+            comp.fixtures
+                .filter(f => !f.played && (f.homeTeamId === teamId || f.awayTeamId === teamId))
+                .map(f => ({ fixture: f, comp }))
+        ).sort((a, b) => new Date(a.fixture.date).getTime() - new Date(b.fixture.date).getTime());
+
+        const nextFixture = allUpcoming[0]?.fixture ?? null;
+        const nextFixtureComp = allUpcoming[0]?.comp ?? null;
+
         const activeMatch = activeMatchId
             ? save.competitions.flatMap(c => c.fixtures).find(f => f.id === activeMatchId) ?? null
             : null;
@@ -50,7 +60,7 @@ export const Fixtures: React.FC = () => {
         const homePlayers = activeMatch ? save.players.filter(p => p.teamId === activeMatch.homeTeamId) : [];
         const awayPlayers = activeMatch ? save.players.filter(p => p.teamId === activeMatch.awayTeamId) : [];
 
-        return { sections, activeMatch, homeTeam, awayTeam, homePlayers, awayPlayers };
+        return { sections, nextFixture, nextFixtureComp, activeMatch, homeTeam, awayTeam, homePlayers, awayPlayers };
     }, [save, activeMatchId]);
 
     if (!save) return null;
@@ -74,6 +84,56 @@ export const Fixtures: React.FC = () => {
                     {sub('fixtures & results') && <p className="text-slate-400 text-sm">{sub('fixtures & results')}</p>}
                     <p className="text-slate-500 text-sm mt-1">{team?.name} • {save.season} {t('Séasúr', 'Season')}</p>
                 </div>
+
+                {/* Pinned next match */}
+                {nextFixture && nextFixtureComp && (() => {
+                    const isHome = nextFixture.homeTeamId === save.teamId;
+                    const opponent = save.teams.find(t => t.id === (isHome ? nextFixture.awayTeamId : nextFixture.homeTeamId));
+                    return (
+                        <div className="bg-emerald-950 border border-emerald-700 rounded-2xl p-5 space-y-3">
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest">
+                                    {t('An Chéad Cluiche Eile', 'Next Match')}
+                                </span>
+                                <span className="text-xs text-emerald-600 font-medium">{nextFixtureComp.name}</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-2 flex-1">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="flex items-center space-x-2">
+                                            <div className="w-5 h-5 rounded-full border border-white/20 flex-shrink-0"
+                                                style={{ background: `linear-gradient(135deg, ${team?.colors[0]} 50%, ${team?.colors[1]} 50%)` }} />
+                                            <span className="font-bold text-white text-lg">{team?.name}</span>
+                                        </div>
+                                        <span className="text-slate-500">vs</span>
+                                        <div className="flex items-center space-x-2">
+                                            <div className="w-5 h-5 rounded-full border border-white/20 flex-shrink-0"
+                                                style={{ background: `linear-gradient(135deg, ${opponent?.colors[0]} 50%, ${opponent?.colors[1]} 50%)` }} />
+                                            <span className="font-semibold text-slate-200 text-lg">{opponent?.name}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center space-x-3 text-sm text-slate-400">
+                                        <span className="flex items-center space-x-1">
+                                            <Calendar size={14} className="text-emerald-500" />
+                                            <span>{formatDate(nextFixture.date)}</span>
+                                        </span>
+                                        <span className="flex items-center space-x-1">
+                                            <MapPin size={14} className="text-slate-500" />
+                                            <span>{nextFixture.venue}</span>
+                                        </span>
+                                        <span className="text-slate-500">{isHome ? t('Baile', 'Home') : t('As Baile', 'Away')}</span>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => setActiveMatchId(nextFixture.id)}
+                                    className="ml-4 px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold transition-colors text-sm"
+                                >
+                                    {t('Imir! ▶', 'Play! ▶')}
+                                </button>
+                            </div>
+                        </div>
+                    );
+                })()}
 
                 {sections.map(({ comp, phase, upcoming, results }) => {
                     const isCurrentComp = comp.id === currentComp.id;
